@@ -11,7 +11,7 @@ export default function Contact() {
                     transition={{ duration: 0.8 }}
                     className="text-4xl md:text-6xl font-bold text-white mb-8"
                 >
-                    Let's Work Together
+                    Let&apos;s Work Together
                 </motion.h2>
 
                 <motion.p
@@ -20,7 +20,7 @@ export default function Contact() {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="text-gray-400 text-lg md:text-xl mb-12"
                 >
-                    Have a project in mind? Reach out and let's create something amazing.
+                    Have a project in mind? Reach out and let&apos;s create something amazing.
                 </motion.p>
 
                 <div className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16">
