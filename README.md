@@ -1,4 +1,4 @@
-# Scrollytelling Portfolio & CMS
+# Scrollytelling Portfolio (v1.1) & CMS
 
 ## 1. Setup
 
