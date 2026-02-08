@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 
 export default function Contact() {
+    // Fixed quotes for deployment v3
     return (
         <section className="relative py-20 px-6 bg-background text-center z-20">
             <div className="max-w-3xl mx-auto">
