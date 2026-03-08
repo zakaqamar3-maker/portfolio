@@ -1,6 +1,9 @@
 import { auth } from "@/auth"; // Use the auth helper from src/auth.ts
 import { redirect } from "next/navigation";
-import { addProject, updateProfile } from "../actions";
+import { addProject, updateProfile, deleteProject } from "../actions";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export default async function AdminPage() {
     const session = await auth();
@@ -8,6 +11,15 @@ export default async function AdminPage() {
     // 1. Security Check: Redirect if not logged in or not admin
     if (!session || session.user?.email !== process.env.ADMIN_EMAIL) {
         redirect("/api/auth/signin");
+    }
+
+    let projects: any[] = [];
+    try {
+        projects = await prisma.project.findMany({
+            orderBy: { createdAt: 'desc' }
+        });
+    } catch {
+        console.warn("Database not connected or schema mismatch.");
     }
 
     return (
@@ -70,6 +82,38 @@ export default async function AdminPage() {
                                 Update Profile
                             </button>
                         </form>
+                    </div>
+                </div>
+                <div className="mt-12">
+                    <h2 className="text-2xl font-bold mb-6">Manage Projects</h2>
+                    <div className="bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
+                        {projects.length === 0 ? (
+                            <p className="p-8 text-gray-400 text-center">No projects found.</p>
+                        ) : (
+                            <ul className="divide-y divide-white/10">
+                                {projects.map((proj) => (
+                                    <li key={proj.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+                                        <div className="flex items-center gap-4">
+                                            {proj.imageUrl && (
+                                                <div className="w-16 h-16 rounded overflow-hidden flex-shrink-0">
+                                                    <img src={proj.imageUrl} alt={proj.title} className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
+                                            <div>
+                                                <h3 className="font-bold text-white">{proj.title}</h3>
+                                                <p className="text-sm text-gray-400 line-clamp-1">{proj.description}</p>
+                                            </div>
+                                        </div>
+                                        <form action={deleteProject}>
+                                            <input type="hidden" name="id" value={proj.id} />
+                                            <button type="submit" className="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 </div>
             </div>

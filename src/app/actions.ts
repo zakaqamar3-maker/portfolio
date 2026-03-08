@@ -64,3 +64,20 @@ export async function updateProfile(formData: FormData) {
 
     revalidatePath("/");
 }
+
+export async function deleteProject(formData: FormData) {
+    if (!(await isAdmin())) {
+        throw new Error("Unauthorized");
+    }
+
+    const id = formData.get("id") as string;
+
+    if (id) {
+        await prisma.project.delete({
+            where: { id }
+        });
+    }
+
+    revalidatePath("/");
+    revalidatePath("/admin");
+}
