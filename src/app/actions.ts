@@ -3,6 +3,14 @@
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth"; // Use auth helper
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const prisma = new PrismaClient();
 
@@ -25,7 +33,21 @@ export async function addProject(formData: FormData) {
     if (imageFile && imageFile.size > 0) {
         const arrayBuffer = await imageFile.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        imageUrl = `data:${imageFile.type};base64,${buffer.toString('base64')}`;
+
+        const result = await new Promise<UploadApiResponse | undefined>((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                { folder: "portfolio_projects" },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            );
+            uploadStream.end(buffer);
+        });
+
+        if (result) {
+            imageUrl = result.secure_url;
+        }
     }
 
     await prisma.project.create({
