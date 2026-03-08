@@ -19,8 +19,14 @@ export async function addProject(formData: FormData) {
 
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
-    const imageUrl = formData.get("imageUrl") as string;
-    // const tags = formData.get("tags") as string; 
+
+    let imageUrl = null;
+    const imageFile = formData.get("image") as File;
+    if (imageFile && imageFile.size > 0) {
+        const arrayBuffer = await imageFile.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        imageUrl = `data:${imageFile.type};base64,${buffer.toString('base64')}`;
+    }
 
     await prisma.project.create({
         data: {

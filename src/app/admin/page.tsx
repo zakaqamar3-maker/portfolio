@@ -37,8 +37,8 @@ export default async function AdminPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm text-gray-400 mb-1">Image URL</label>
-                                <input name="imageUrl" type="text" placeholder="https://..." className="w-full bg-white/10 p-3 rounded-lg border border-white/10 focus:outline-none focus:border-purple-500" />
+                                <label className="block text-sm text-gray-400 mb-1">Project Screenshot</label>
+                                <input name="image" type="file" accept="image/*" className="w-full bg-white/10 p-3 rounded-lg border border-white/10 focus:outline-none focus:border-purple-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 text-gray-400" />
                             </div>
 
                             <div>
