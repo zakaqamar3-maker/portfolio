@@ -308,41 +308,32 @@
   /* ── Video Project Lightbox & Hover Previews ────────────── */
   const videoCards = $$('.project-card--video');
   const videoModal = $('#video-modal');
-  const videoModalPlayer = $('#video-modal-player');
+  const videoModalIframe = $('#video-modal-iframe');
   const videoModalClose = $('#video-modal-close');
   const videoModalBackdrop = $('#video-modal-backdrop');
   const videoModalTitle = $('#video-modal-title');
   const videoModalDesc = $('#video-modal-desc');
   const videoModalTools = $('#video-modal-tools');
 
-  // Micro Hover Previews on Cards
   videoCards.forEach(card => {
-    const previewVideo = card.querySelector('.project-card__video-preview');
-
-    if (previewVideo) {
-      card.addEventListener('mouseenter', () => {
-        const playPromise = previewVideo.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(() => { /* Autoplay was prevented */ });
-        }
-      });
-
-      card.addEventListener('mouseleave', () => {
-        previewVideo.pause();
-        previewVideo.currentTime = 0;
-      });
-    }
-
     // Open Modal on click or keyboard press
     function triggerModal() {
+      const driveId = card.dataset.driveId;
       const src = card.dataset.videoSrc;
       const title = card.dataset.videoTitle || 'Video Showcase';
       const desc = card.dataset.videoDesc || '';
       const tools = (card.dataset.videoTools || '').split(',').filter(Boolean);
 
-      if (!src || !videoModal || !videoModalPlayer) return;
+      if (!videoModal || !videoModalIframe) return;
 
-      videoModalPlayer.src = src;
+      if (driveId) {
+        videoModalIframe.src = `https://drive.google.com/file/d/${driveId}/preview`;
+      } else if (src) {
+        videoModalIframe.src = src;
+      } else {
+        return;
+      }
+
       if (videoModalTitle) videoModalTitle.textContent = title;
       if (videoModalDesc) videoModalDesc.textContent = desc;
 
@@ -360,7 +351,6 @@
       videoModal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
 
-      videoModalPlayer.play().catch(() => {});
       if (videoModalClose) videoModalClose.focus();
     }
 
@@ -379,13 +369,11 @@
 
   // Close Modal Handler
   function closeVideoModal() {
-    if (!videoModal || !videoModalPlayer) return;
+    if (!videoModal || !videoModalIframe) return;
     videoModal.classList.remove('is-open');
     videoModal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
-    videoModalPlayer.pause();
-    videoModalPlayer.currentTime = 0;
-    videoModalPlayer.src = '';
+    videoModalIframe.src = '';
   }
 
   if (videoModalClose) videoModalClose.addEventListener('click', closeVideoModal);
