@@ -194,18 +194,34 @@
       const original = btnText.textContent;
       btnText.textContent = 'Sending…';
 
-      // ↓ Replace with your Formspree / Netlify Forms endpoint
-      //   For now: simulate a 1.5s delay
-      await new Promise(r => setTimeout(r, 1500));
+      try {
+        const formData = new FormData(form);
+        formData.append('_captcha', 'false');
+        formData.append('_subject', `📩 New Portfolio Message from ${$('#f-name').value}`);
 
-      btn.disabled = false;
-      btn.classList.remove('btn--loading');
-      btnText.textContent = original;
+        const res = await fetch('https://formsubmit.co/ajax/zakaqmar3@gmail.com', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
 
-      // Show success
-      form.setAttribute('hidden', '');
-      formSuccess.classList.add('visible');
-      formSuccess.focus();
+        if (!res.ok) {
+          throw new Error('Network error');
+        }
+
+        // Show success message
+        form.setAttribute('hidden', '');
+        formSuccess.classList.add('visible');
+        formSuccess.focus();
+      } catch (err) {
+        alert('There was an issue sending your message. Please email directly to zakaqmar3@gmail.com or WhatsApp +92 343 4674134.');
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('btn--loading');
+        btnText.textContent = original;
+      }
     });
   }
 
