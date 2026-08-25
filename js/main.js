@@ -183,9 +183,14 @@
       return valid;
     }
 
-    form.addEventListener('submit', e => {
+    form.addEventListener('submit', async e => {
       e.preventDefault();
       if (!validateForm()) return;
+
+      const btn = form.querySelector('[type="submit"]');
+      const btnText = btn ? btn.querySelector('.btn-text') : null;
+      if (btn) btn.disabled = true;
+      if (btnText) btnText.textContent = 'Sending…';
 
       const name = $('#f-name').value.trim();
       const email = $('#f-email').value.trim();
@@ -193,18 +198,41 @@
       const type = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : 'General Inquiry';
       const message = $('#f-message').value.trim();
 
-      const subject = `📩 New Project Inquiry from ${name}`;
-      const body = `Hi Qamar,\n\nName: ${name}\nEmail: ${email}\nProject Type: ${type}\n\nMessage:\n${message}\n\n--\nSent via qamzaka.site`;
+      try {
+        const payload = {
+          name: name,
+          email: email,
+          project_type: type,
+          message: message,
+          _subject: `📩 New Lead from ${name}`,
+          _captcha: "false"
+        };
 
-      const mailtoUrl = `mailto:zakaqmar3@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        await fetch('https://formsubmit.co/ajax/zakaqmar3@gmail.com', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
 
-      // Open client's direct email app
-      window.location.href = mailtoUrl;
-
-      // Show success state on site
-      form.setAttribute('hidden', '');
-      formSuccess.classList.add('visible');
-      formSuccess.focus();
+        // Smoothly hide form and show success message on site
+        form.setAttribute('hidden', '');
+        if (formSuccess) {
+          formSuccess.classList.add('visible');
+          formSuccess.focus();
+        }
+      } catch (err) {
+        form.setAttribute('hidden', '');
+        if (formSuccess) {
+          formSuccess.classList.add('visible');
+          formSuccess.focus();
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.textContent = 'Send Message ↗';
+      }
     });
   }
 
