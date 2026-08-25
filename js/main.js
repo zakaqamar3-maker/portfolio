@@ -184,18 +184,27 @@
     }
 
     form.addEventListener('submit', e => {
-      if (!validateForm()) {
-        e.preventDefault();
-        return;
-      }
+      e.preventDefault();
+      if (!validateForm()) return;
 
-      // Valid! Allow native submission to FormSubmit
-      const btn = form.querySelector('[type="submit"]');
-      const btnText = btn.querySelector('.btn-text');
-      if (btn && btnText) {
-        btn.disabled = true;
-        btnText.textContent = 'Sending…';
-      }
+      const name = $('#f-name').value.trim();
+      const email = $('#f-email').value.trim();
+      const typeSelect = $('#f-type');
+      const type = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : 'General Inquiry';
+      const message = $('#f-message').value.trim();
+
+      const subject = `📩 New Project Inquiry from ${name}`;
+      const body = `Hi Qamar,\n\nName: ${name}\nEmail: ${email}\nProject Type: ${type}\n\nMessage:\n${message}\n\n--\nSent via qamzaka.site`;
+
+      const mailtoUrl = `mailto:zakaqmar3@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+      // Open client's direct email app
+      window.location.href = mailtoUrl;
+
+      // Show success state on site
+      form.setAttribute('hidden', '');
+      formSuccess.classList.add('visible');
+      formSuccess.focus();
     });
   }
 
