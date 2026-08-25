@@ -183,44 +183,18 @@
       return valid;
     }
 
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      if (!validateForm()) return;
+    form.addEventListener('submit', e => {
+      if (!validateForm()) {
+        e.preventDefault();
+        return;
+      }
 
+      // Valid! Allow native submission to FormSubmit
       const btn = form.querySelector('[type="submit"]');
       const btnText = btn.querySelector('.btn-text');
-      btn.disabled = true;
-      btn.classList.add('btn--loading');
-      const original = btnText.textContent;
-      btnText.textContent = 'Sending…';
-
-      try {
-        const formData = new FormData(form);
-        formData.append('_captcha', 'false');
-        formData.append('_subject', `📩 New Portfolio Message from ${$('#f-name').value}`);
-
-        const res = await fetch('https://formsubmit.co/ajax/zakaqmar3@gmail.com', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-
-        if (!res.ok) {
-          throw new Error('Network error');
-        }
-
-        // Show success message
-        form.setAttribute('hidden', '');
-        formSuccess.classList.add('visible');
-        formSuccess.focus();
-      } catch (err) {
-        alert('There was an issue sending your message. Please email directly to zakaqmar3@gmail.com or WhatsApp +92 343 4674134.');
-      } finally {
-        btn.disabled = false;
-        btn.classList.remove('btn--loading');
-        btnText.textContent = original;
+      if (btn && btnText) {
+        btn.disabled = true;
+        btnText.textContent = 'Sending…';
       }
     });
   }
