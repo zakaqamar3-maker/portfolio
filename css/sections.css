@@ -995,3 +995,91 @@
   .hero__ctas     { flex-direction: column; width: 100%; }
   .hero__ctas .btn { width: 100%; justify-content: center; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   INSIGHTS & BLOG SECTION
+   ══════════════════════════════════════════════════════════════ */
+.insights {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.insights__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--s-6);
+  margin-top: var(--s-10);
+}
+
+.insight-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: var(--s-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+}
+
+.insight-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--sh-lg);
+  border-color: var(--accent);
+}
+
+.insight-card__badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(49, 92, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  display: inline-block;
+  margin-bottom: var(--s-4);
+  align-self: flex-start;
+}
+
+.insight-card__title {
+  font-size: var(--fs-h4);
+  font-weight: 700;
+  color: var(--text);
+  line-height: var(--lh-tight);
+  margin-bottom: var(--s-3);
+  transition: color var(--t-fast);
+}
+
+.insight-card:hover .insight-card__title {
+  color: var(--accent);
+}
+
+.insight-card__desc {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  line-height: var(--lh-relaxed);
+  margin-bottom: var(--s-6);
+}
+
+.insight-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: var(--s-4);
+  margin-top: auto;
+}
+
+.insight-card__cta {
+  font-weight: 600;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
