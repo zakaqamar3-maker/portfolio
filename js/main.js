@@ -332,5 +332,184 @@
     }
   }
 
+  /* ══════════════════════════════════════════════════════════
+     INTERACTIVE UX ENHANCEMENTS
+     ══════════════════════════════════════════════════════════ */
+
+  // 1. Reading Scroll Progress Bar
+  const progressBar = document.createElement('div');
+  progressBar.className = 'scroll-progress-bar';
+  progressBar.id = 'scroll-progress';
+  document.body.appendChild(progressBar);
+
+  window.addEventListener('scroll', () => {
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
+    progressBar.style.width = Math.min(100, Math.max(0, progress)) + '%';
+  }, { passive: true });
+
+  // 2. Interactive Ambient Cursor Glow (Desktop)
+  if (window.matchMedia('(hover: hover) and (min-width: 992px)').matches) {
+    const glow = document.createElement('div');
+    glow.className = 'cursor-glow';
+    document.body.appendChild(glow);
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let currentX = mouseX;
+    let currentY = mouseY;
+
+    window.addEventListener('mousemove', e => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    }, { passive: true });
+
+    function updateCursorGlow() {
+      currentX += (mouseX - currentX) * 0.15;
+      currentY += (mouseY - currentY) * 0.15;
+      glow.style.transform = `translate3d(${currentX - 190}px, ${currentY - 190}px, 0)`;
+      requestAnimationFrame(updateCursorGlow);
+    }
+    requestAnimationFrame(updateCursorGlow);
+  }
+
+  // 3. Smooth Number Counter Animation
+  const countElements = document.querySelectorAll('[data-counter-target]');
+  if (countElements.length > 0) {
+    const counterObserver = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const target = parseFloat(el.getAttribute('data-counter-target'));
+        const decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+        const prefix = el.getAttribute('data-prefix') || '';
+        const suffix = el.getAttribute('data-suffix') || '';
+        const duration = 1600; // ms
+        const startTime = performance.now();
+
+        function countStep(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // Ease out cubic
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          const currentVal = target * easeOut;
+          
+          el.textContent = prefix + (decimals > 0 ? currentVal.toFixed(decimals) : Math.round(currentVal)) + suffix;
+
+          if (progress < 1) {
+            requestAnimationFrame(countStep);
+          } else {
+            el.textContent = prefix + (decimals > 0 ? target.toFixed(decimals) : target) + suffix;
+          }
+        }
+
+        requestAnimationFrame(countStep);
+        obs.unobserve(el);
+      });
+    }, { threshold: 0.2 });
+
+    countElements.forEach(el => counterObserver.observe(el));
+  }
+
+  // 4. Interactive 3D Card Tilt on Hover (Smooth GPU Accelerated)
+  if (window.matchMedia('(hover: hover) and (min-width: 768px)').matches) {
+    const tiltCards = document.querySelectorAll('.project-card, .service-card, .insight-card');
+    tiltCards.forEach(card => {
+      let isCardHovered = false;
+      let cardRaf = null;
+      let cardTargetX = 0;
+      let cardTargetY = 0;
+      let cardCurX = 0;
+      let cardCurY = 0;
+
+      function renderCardTilt() {
+        cardCurX += (cardTargetX - cardCurX) * 0.12;
+        cardCurY += (cardTargetY - cardCurY) * 0.12;
+        
+        card.style.transform = `perspective(1000px) rotateX(${cardCurX}deg) rotateY(${cardCurY}deg) translateY(-4px)`;
+
+        if (isCardHovered || Math.abs(cardTargetX - cardCurX) > 0.05 || Math.abs(cardTargetY - cardCurY) > 0.05) {
+          cardRaf = requestAnimationFrame(renderCardTilt);
+        } else {
+          card.style.transform = '';
+          cardRaf = null;
+        }
+      }
+
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width;
+        const py = (e.clientY - rect.top) / rect.height;
+        // Tilt range: -6deg to +6deg
+        cardTargetX = (0.5 - py) * 8;
+        cardTargetY = (px - 0.5) * 8;
+        isCardHovered = true;
+        if (!cardRaf) cardRaf = requestAnimationFrame(renderCardTilt);
+      }, { passive: true });
+
+      card.addEventListener('mouseleave', () => {
+        isCardHovered = false;
+        cardTargetX = 0;
+        cardTargetY = 0;
+        if (!cardRaf) cardRaf = requestAnimationFrame(renderCardTilt);
+      }, { passive: true });
+    });
+  }
+
+  // 5. Toast Notification System & Copy-to-Clipboard
+  const toast = document.createElement('div');
+  toast.className = 'toast-notification';
+  toast.id = 'toast-notification';
+  toast.innerHTML = `<span class="toast-notification__icon">✓</span><span id="toast-text">Action completed</span>`;
+  document.body.appendChild(toast);
+
+  let toastTimer = null;
+  window.showToast = function (msg = 'Copied to clipboard!') {
+    const textEl = document.getElementById('toast-text');
+    if (textEl) textEl.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2800);
+  };
+
+  // Add click-to-copy handler on email links with data-copy-email attribute
+  document.querySelectorAll('[data-copy-email]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      const email = 'zakaqmar3@gmail.com';
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(email).then(() => {
+          window.showToast('✓ Email copied: ' + email);
+        }).catch(() => {
+          window.location.href = 'mailto:' + email;
+        });
+      } else {
+        window.location.href = 'mailto:' + email;
+      }
+    });
+  });
+
+  // 6. Back-to-Top Floating Button
+  const backToTop = document.createElement('button');
+  backToTop.className = 'back-to-top';
+  backToTop.setAttribute('aria-label', 'Scroll back to top');
+  backToTop.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>`;
+  document.body.appendChild(backToTop);
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 420) {
+      backToTop.classList.add('visible');
+    } else {
+      backToTop.classList.remove('visible');
+    }
+  }, { passive: true });
+
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
 })();
+
 
