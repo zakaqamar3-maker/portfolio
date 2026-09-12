@@ -491,25 +491,172 @@
     });
   });
 
-  // 6. Back-to-Top Floating Button
-  const backToTop = document.createElement('button');
-  backToTop.className = 'back-to-top';
-  backToTop.setAttribute('aria-label', 'Scroll back to top');
-  backToTop.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>`;
-  document.body.appendChild(backToTop);
+  // 7. Testimonials Interactive Submit Form & Persistence
+  const tTrigger = document.getElementById('tsubmit-trigger');
+  const tForm = document.getElementById('tsubmit-form');
+  const tSuccess = document.getElementById('tsubmit-success');
+  const tRatingStars = document.querySelectorAll('#t-rating-stars .star-btn');
+  const tRatingInput = document.getElementById('t-rating');
+  const tMessage = document.getElementById('t-message');
+  const tCharCount = document.getElementById('t-char-count');
+  const tGrid = document.getElementById('testimonials-grid');
 
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 420) {
-      backToTop.classList.add('visible');
-    } else {
-      backToTop.classList.remove('visible');
+  // Toggle Form
+  if (tTrigger && tForm) {
+    tTrigger.addEventListener('click', () => {
+      const isOpen = tForm.classList.contains('open');
+      if (isOpen) {
+        tForm.classList.remove('open');
+        tForm.setAttribute('aria-hidden', 'true');
+        tTrigger.setAttribute('aria-expanded', 'false');
+      } else {
+        tForm.classList.add('open');
+        tForm.setAttribute('aria-hidden', 'false');
+        tTrigger.setAttribute('aria-expanded', 'true');
+        setTimeout(() => {
+          document.getElementById('t-name')?.focus();
+        }, 300);
+      }
+    });
+  }
+
+  // Star Rating Selection
+  if (tRatingStars.length > 0 && tRatingInput) {
+    tRatingStars.forEach((star, index) => {
+      star.addEventListener('click', () => {
+        const val = parseInt(star.getAttribute('data-val') || '5', 10);
+        tRatingInput.value = val;
+        tRatingStars.forEach((s, idx) => {
+          if (idx < val) {
+            s.classList.add('active');
+          } else {
+            s.classList.remove('active');
+          }
+        });
+      });
+    });
+  }
+
+  // Character Counter for Review
+  if (tMessage && tCharCount) {
+    tMessage.addEventListener('input', () => {
+      const len = tMessage.value.trim().length;
+      tCharCount.textContent = `${len} / 30 min characters`;
+      if (len >= 30) {
+        tCharCount.classList.add('ready');
+      } else {
+        tCharCount.classList.remove('ready');
+      }
+    });
+  }
+
+  // Submit Handler
+  if (tForm) {
+    tForm.addEventListener('submit', e => {
+      e.preventDefault();
+      
+      const name = document.getElementById('t-name').value.trim();
+      const role = document.getElementById('t-role').value.trim();
+      const service = document.getElementById('t-service').value;
+      const rating = tRatingInput ? parseInt(tRatingInput.value, 10) : 5;
+      const message = tMessage.value.trim();
+
+      if (!name || !role || !service || message.length < 30) {
+        if (window.showToast) {
+          window.showToast('⚠️ Please complete all fields (min 30 characters for review).');
+        }
+        return;
+      }
+
+      // Create initial avatar
+      const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CL';
+
+      // Stars string
+      const starsStr = '★'.repeat(rating);
+
+      // Create new testimonial element
+      const newCard = document.createElement('article');
+      newCard.className = 'tcard reveal in-view';
+      newCard.style.border = '1px solid var(--accent)';
+      newCard.style.boxShadow = '0 0 20px color-mix(in srgb, var(--accent) 25%, transparent)';
+      newCard.innerHTML = `
+        <div class="tcard__stars" aria-label="${rating} out of 5 stars">
+          <span aria-hidden="true">${starsStr}</span>
+        </div>
+        <blockquote class="tcard__quote">
+          "${message}"
+        </blockquote>
+        <div class="tcard__author">
+          <div class="tcard__avatar" style="background: linear-gradient(135deg, var(--accent), #10B981);" aria-hidden="true">${initials}</div>
+          <div>
+            <div class="tcard__name">${name} <span style="font-size: 0.75rem; color: #10B981; margin-left: 4px;">✓ Verified</span></div>
+            <div class="tcard__role">${role}</div>
+          </div>
+        </div>
+        <span class="tcard__service-badge">${service}</span>
+      `;
+
+      // Append to grid
+      if (tGrid) {
+        tGrid.prepend(newCard);
+      }
+
+      // Hide form & show success
+      tForm.classList.remove('open');
+      tForm.setAttribute('aria-hidden', 'true');
+      if (tTrigger) tTrigger.style.display = 'none';
+      if (tSuccess) tSuccess.hidden = false;
+
+      // Toast notification
+      if (window.showToast) {
+        window.showToast('🎉 Thank you! Your review is now live on the site.');
+      }
+
+      // Save to localStorage so it stays on page reload for the visitor
+      try {
+        const existing = JSON.parse(localStorage.getItem('qz_user_reviews') || '[]');
+        existing.unshift({ name, role, service, rating, message, date: new Date().toISOString() });
+        localStorage.setItem('qz_user_reviews', JSON.stringify(existing));
+      } catch (err) {
+        console.error('LocalStorage write error:', err);
+      }
+    });
+  }
+
+  // Load persisted user reviews from LocalStorage on load
+  try {
+    const saved = JSON.parse(localStorage.getItem('qz_user_reviews') || '[]');
+    if (saved.length > 0 && tGrid) {
+      saved.forEach(review => {
+        const initials = review.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CL';
+        const starsStr = '★'.repeat(review.rating || 5);
+        const card = document.createElement('article');
+        card.className = 'tcard reveal in-view';
+        card.style.border = '1px solid color-mix(in srgb, var(--accent) 40%, transparent)';
+        card.innerHTML = `
+          <div class="tcard__stars" aria-label="${review.rating} out of 5 stars">
+            <span aria-hidden="true">${starsStr}</span>
+          </div>
+          <blockquote class="tcard__quote">
+            "${review.message}"
+          </blockquote>
+          <div class="tcard__author">
+            <div class="tcard__avatar" style="background: linear-gradient(135deg, var(--accent), #10B981);" aria-hidden="true">${initials}</div>
+            <div>
+              <div class="tcard__name">${review.name} <span style="font-size: 0.75rem; color: #10B981; margin-left: 4px;">✓ Verified</span></div>
+              <div class="tcard__role">${review.role}</div>
+            </div>
+          </div>
+          <span class="tcard__service-badge">${review.service}</span>
+        `;
+        tGrid.prepend(card);
+      });
     }
-  }, { passive: true });
-
-  backToTop.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+  } catch (err) {
+    console.error('LocalStorage read error:', err);
+  }
 
 })();
+
 
 
