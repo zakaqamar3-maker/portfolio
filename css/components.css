@@ -321,6 +321,7 @@
   transition: color var(--t-fast), background var(--t-fast), border-color var(--t-fast);
   min-height: 44px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .filter-btn:hover { color: var(--text); background: var(--surface); }
 .filter-btn.active { background: var(--text); color: #fff; }

@@ -362,19 +362,27 @@
 
 .work__filters-wrap {
   display: flex;
-  gap: var(--s-1);
+  flex-wrap: nowrap;
+  gap: var(--s-2);
   padding: var(--s-2);
-  background: var(--bg);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-full);
-  width: fit-content;
+  max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  flex-wrap: wrap;
-  margin-bottom: clamp(2.5rem, 4vw, 4rem);
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
 }
 .work__filters-wrap::-webkit-scrollbar { display: none; }
+
+@media (max-width: 640px) {
+  .work__filters-wrap {
+    border-radius: var(--radius-xl);
+    padding: 6px;
+    gap: 4px;
+  }
+}
 
 .work__grid {
   display: grid;
