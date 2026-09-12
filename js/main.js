@@ -374,7 +374,7 @@
   }
 
   // 3. Smooth Number Counter Animation
-  const countElements = document.querySelectorAll('[data-counter-target]');
+  const countElements = document.querySelectorAll('.stat-num[data-counter-target]');
   if (countElements.length > 0) {
     const counterObserver = new IntersectionObserver((entries, obs) => {
       entries.forEach(entry => {
