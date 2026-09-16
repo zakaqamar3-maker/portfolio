@@ -198,13 +198,29 @@
     const btn = cForm.querySelector('button[type="submit"]');
     const btnText = btn ? btn.querySelector('.btn-text') : null;
     if (btn) btn.disabled = true;
-    if (btnText) btnText.textContent = 'Sending Message… ⏳';
+    if (btnText) btnText.textContent = 'Opening Email App… ✉️';
 
     const name = nameEl.value.trim();
     const email = emailEl.value.trim();
     const type = typeSelect && typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : 'General Inquiry';
     const message = messageEl.value.trim();
 
+    // Construct Mailto prefilled link
+    const subjectStr = `New Project Inquiry from ${name}`;
+    const bodyStr = `Name: ${name}\n` +
+                    `Email: ${email}\n` +
+                    `Project Type: ${type}\n\n` +
+                    `Message:\n${message}`;
+
+    const mailtoUrl = `mailto:zakaqmar3@gmail.com?subject=${encodeURIComponent(subjectStr)}&body=${encodeURIComponent(bodyStr)}`;
+
+    // Set fallback manual link
+    const manualLink = document.getElementById('manual-mailto-link');
+    if (manualLink) {
+      manualLink.href = mailtoUrl;
+    }
+
+    // Trigger background FormSubmit AJAX send as double guarantee
     try {
       const payload = {
         name: name,
@@ -215,19 +231,19 @@
         _captcha: "false"
       };
 
-      await fetch('https://formsubmit.co/ajax/zakaqmar3@gmail.com', {
+      fetch('https://formsubmit.co/ajax/zakaqmar3@gmail.com', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
         body: JSON.stringify(payload)
-      });
+      }).catch(err => console.warn('Background FormSubmit AJAX notification:', err));
     } catch (err) {
-      console.warn('Contact AJAX fetch completed:', err);
+      console.warn('Background dispatch error:', err);
     }
 
-    // Hide form & show success without page reload
+    // Hide form & show success view
     cForm.style.display = 'none';
     if (cSuccess) {
       cSuccess.style.display = 'block';
@@ -236,9 +252,10 @@
     }
 
     if (window.showToast) {
-      window.showToast('✅ Message sent successfully to Qamar Zaka!');
+      window.showToast('✉️ Opening email app with pre-filled details…');
     }
 
+    // Save lead to LocalStorage
     try {
       const leads = JSON.parse(localStorage.getItem('qz_user_leads') || '[]');
       leads.unshift({ name, email, type, message, date: new Date().toISOString() });
@@ -246,6 +263,11 @@
     } catch (err) {
       console.error('LocalStorage lead error:', err);
     }
+
+    // Auto open email client app with prefilled data
+    setTimeout(() => {
+      window.location.href = mailtoUrl;
+    }, 250);
 
     if (btn) btn.disabled = false;
     if (btnText) btnText.textContent = 'Send Message ↗';

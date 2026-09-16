@@ -1726,11 +1726,16 @@
 
             <!-- Success message (hidden until form submitted) -->
             <div class="form-success" id="form-success" tabindex="-1" aria-live="polite">
-              <div class="form-success__icon" aria-hidden="true">✅</div>
-              <h3 class="form-success__title">Message sent!</h3>
+              <div class="form-success__icon" aria-hidden="true">✉️</div>
+              <h3 class="form-success__title">Opening Your Email App…</h3>
               <p class="form-success__body">
-                Thanks for reaching out, Qamar will get back to you shortly at your email.
+                Your email app (Gmail / Outlook / Mail) is opening automatically with all your project details pre-filled.
               </p>
+              <div style="margin-top: 16px;">
+                <a id="manual-mailto-link" href="#" class="btn btn--accent btn--sm">
+                  Click here if email app didn't open ↗
+                </a>
+              </div>
             </div>
 
             <!-- Form -->
