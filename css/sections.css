@@ -1125,7 +1125,7 @@
   position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--r-2xl);
   padding: var(--s-7) var(--s-7) var(--s-6);
   display: flex;
   flex-direction: column;
@@ -1292,7 +1292,7 @@
 .tsubmit-form__field textarea {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-xl);
   color: var(--text);
   font-family: inherit;
   font-size: var(--fs-sm);

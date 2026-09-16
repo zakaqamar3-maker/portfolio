@@ -184,7 +184,7 @@
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);
   line-height: 1;
-  border-radius: var(--r-md);
+  border-radius: var(--r-full);
   border: 1.5px solid transparent;
   transition:
     background-color var(--t-fast),
@@ -334,7 +334,7 @@
   padding: var(--s-8);
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-2xl);
   display: flex;
   flex-direction: column;
   gap: var(--s-5);
