@@ -1739,6 +1739,7 @@
               id="contact-form"
               novalidate
               aria-label="Contact form"
+              onsubmit="handleContactSubmit(event); return false;"
             >
               <div class="contact__form-row">
 
@@ -1959,14 +1960,14 @@
   <!-- ── Review Modal Overlay ───────────────────────────────── -->
   <div class="modal-overlay" id="review-modal" role="dialog" aria-modal="true" aria-labelledby="rm-title" hidden>
     <div class="modal-card" style="max-width: 580px; width: 92%; border-radius: 24px; padding: 32px; background: var(--surface); border: 1px solid var(--border);">
-      <button class="modal-close" id="rm-close" aria-label="Close modal">✕</button>
+      <button class="modal-close" id="rm-close" aria-label="Close modal" onclick="closeReviewModal(event)">✕</button>
       <div style="margin-bottom: var(--s-5);">
         <span class="section-label" style="font-size: 0.75rem;">Client Feedback</span>
         <h3 id="rm-title" style="font-size: var(--fs-h3); font-weight: 700; color: var(--text); margin-top: 4px;">Share Your Experience</h3>
         <p style="font-size: var(--fs-xs); color: var(--text-muted); margin-top: 4px;">Your review helps other clients discover quality UI/UX design &amp; creative services.</p>
       </div>
 
-      <form class="tsubmit-form open" id="tsubmit-form" style="border: none; padding: 0; background: transparent;" novalidate>
+      <form class="tsubmit-form open" id="tsubmit-form" style="border: none; padding: 0; background: transparent;" novalidate onsubmit="handleReviewSubmit(event); return false;">
         <div class="tsubmit-form__grid" style="grid-template-columns: 1fr 1fr; gap: var(--s-4);">
           <div class="tsubmit-form__field">
             <label for="t-name">Your Name <span aria-hidden="true">*</span></label>

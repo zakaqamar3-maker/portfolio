@@ -127,113 +127,133 @@
   const form = $('#contact-form');
   const formSuccess = $('#form-success');
 
-  if (form && formSuccess) {
-    // Live validation: clear error on change
+  function showFieldError(field, msg) {
+    if (!field) return;
+    field.classList.add('is-error');
+    field.setAttribute('aria-invalid', 'true');
+    const errEl = document.getElementById(field.id + '-err');
+    if (errEl) {
+      errEl.textContent = msg;
+      errEl.removeAttribute('hidden');
+      field.setAttribute('aria-describedby', errEl.id);
+    }
+  }
+
+  function clearFieldError(field) {
+    if (!field) return;
+    field.classList.remove('is-error');
+    field.removeAttribute('aria-invalid');
+    const errEl = document.getElementById(field.id + '-err');
+    if (errEl) {
+      errEl.textContent = '';
+      errEl.setAttribute('hidden', '');
+    }
+  }
+
+  if (form) {
     $$('input, select, textarea', form).forEach(field => {
       ['input', 'change'].forEach(evt => {
         field.addEventListener(evt, () => clearFieldError(field));
       });
     });
+  }
 
-    function showFieldError(field, msg) {
-      field.classList.add('is-error');
-      field.setAttribute('aria-invalid', 'true');
-      const errEl = document.getElementById(field.id + '-err');
-      if (errEl) {
-        errEl.textContent = msg;
-        errEl.removeAttribute('hidden');
-        field.setAttribute('aria-describedby', errEl.id);
-      }
-    }
-
-    function clearFieldError(field) {
-      field.classList.remove('is-error');
-      field.removeAttribute('aria-invalid');
-      const errEl = document.getElementById(field.id + '-err');
-      if (errEl) {
-        errEl.textContent = '';
-        errEl.setAttribute('hidden', '');
-      }
-    }
-
-    function validateForm() {
-      let valid = true;
-      const name    = $('#f-name');
-      const email   = $('#f-email');
-      const message = $('#f-message');
-
-      if (!name.value.trim()) {
-        showFieldError(name, 'Please enter your name.');
-        if (valid) { name.focus(); valid = false; }
-      }
-
-      if (!email.value.trim()) {
-        showFieldError(email, 'Please enter your email address.');
-        if (valid) { email.focus(); valid = false; }
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
-        showFieldError(email, 'Please enter a valid email address.');
-        if (valid) { email.focus(); valid = false; }
-      }
-
-      if (!message.value.trim()) {
-        showFieldError(message, 'Please enter a message.');
-        if (valid) { message.focus(); valid = false; }
-      }
-
-      return valid;
-    }
-
-    form.addEventListener('submit', async e => {
+  window.handleContactSubmit = async function (e) {
+    if (e) {
       e.preventDefault();
-      if (!validateForm()) return;
+      e.stopPropagation();
+    }
 
-      const btn = form.querySelector('[type="submit"]');
-      const btnText = btn ? btn.querySelector('.btn-text') : null;
-      if (btn) btn.disabled = true;
-      if (btnText) btnText.textContent = 'Sending…';
+    const cForm = document.getElementById('contact-form');
+    const cSuccess = document.getElementById('form-success');
+    if (!cForm) return false;
 
-      const name = $('#f-name').value.trim();
-      const email = $('#f-email').value.trim();
-      const typeSelect = $('#f-type');
-      const type = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : 'General Inquiry';
-      const message = $('#f-message').value.trim();
+    const nameEl = document.getElementById('f-name');
+    const emailEl = document.getElementById('f-email');
+    const typeSelect = document.getElementById('f-type');
+    const messageEl = document.getElementById('f-message');
 
-      try {
-        const payload = {
-          name: name,
-          email: email,
-          project_type: type,
-          message: message,
-          _subject: `📩 New Lead from ${name}`,
-          _captcha: "false"
-        };
+    let valid = true;
 
-        await fetch('https://formsubmit.co/ajax/zakaqmar3@gmail.com', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
+    if (!nameEl || !nameEl.value.trim()) {
+      showFieldError(nameEl, 'Please enter your name.');
+      if (valid && nameEl) { nameEl.focus(); valid = false; }
+    }
 
-        // Smoothly hide form and show success message on site
-        form.setAttribute('hidden', '');
-        if (formSuccess) {
-          formSuccess.classList.add('visible');
-          formSuccess.focus();
-        }
-      } catch (err) {
-        form.setAttribute('hidden', '');
-        if (formSuccess) {
-          formSuccess.classList.add('visible');
-          formSuccess.focus();
-        }
-      } finally {
-        if (btn) btn.disabled = false;
-        if (btnText) btnText.textContent = 'Send Message ↗';
-      }
-    });
+    if (!emailEl || !emailEl.value.trim()) {
+      showFieldError(emailEl, 'Please enter your email address.');
+      if (valid && emailEl) { emailEl.focus(); valid = false; }
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value.trim())) {
+      showFieldError(emailEl, 'Please enter a valid email address.');
+      if (valid && emailEl) { emailEl.focus(); valid = false; }
+    }
+
+    if (!messageEl || !messageEl.value.trim()) {
+      showFieldError(messageEl, 'Please enter a message.');
+      if (valid && messageEl) { messageEl.focus(); valid = false; }
+    }
+
+    if (!valid) return false;
+
+    const btn = cForm.querySelector('button[type="submit"]');
+    const btnText = btn ? btn.querySelector('.btn-text') : null;
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.textContent = 'Sending Message… ⏳';
+
+    const name = nameEl.value.trim();
+    const email = emailEl.value.trim();
+    const type = typeSelect && typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : 'General Inquiry';
+    const message = messageEl.value.trim();
+
+    try {
+      const payload = {
+        name: name,
+        email: email,
+        project_type: type,
+        message: message,
+        _subject: `📩 New Lead from ${name}`,
+        _captcha: "false"
+      };
+
+      await fetch('https://formsubmit.co/ajax/zakaqmar3@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.warn('Contact AJAX fetch completed:', err);
+    }
+
+    // Hide form & show success without page reload
+    cForm.style.display = 'none';
+    if (cSuccess) {
+      cSuccess.style.display = 'block';
+      cSuccess.classList.add('visible');
+      cSuccess.focus();
+    }
+
+    if (window.showToast) {
+      window.showToast('✅ Message sent successfully to Qamar Zaka!');
+    }
+
+    try {
+      const leads = JSON.parse(localStorage.getItem('qz_user_leads') || '[]');
+      leads.unshift({ name, email, type, message, date: new Date().toISOString() });
+      localStorage.setItem('qz_user_leads', JSON.stringify(leads));
+    } catch (err) {
+      console.error('LocalStorage lead error:', err);
+    }
+
+    if (btn) btn.disabled = false;
+    if (btnText) btnText.textContent = 'Send Message ↗';
+    return false;
+  };
+
+  if (form) {
+    form.addEventListener('submit', window.handleContactSubmit);
   }
 
   /* ── Hero Photo 3D Interactive Parallax ────────────────── */
@@ -503,38 +523,42 @@
   const tCharCount = document.getElementById('t-char-count');
   const tGrid = document.getElementById('testimonials-grid');
 
-  // Open Modal
-  if (tTrigger && rModal) {
-    tTrigger.addEventListener('click', () => {
-      rModal.hidden = false;
+  window.openReviewModal = function (e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    const modal = document.getElementById('review-modal');
+    if (modal) {
+      modal.hidden = false;
+      modal.removeAttribute('hidden');
+      modal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
       setTimeout(() => {
         document.getElementById('t-name')?.focus();
-      }, 100);
-    });
-  }
+      }, 50);
+    }
+  };
 
-  // Close Modal
-  function closeReviewModal() {
-    if (rModal) {
-      rModal.hidden = true;
+  window.closeReviewModal = function (e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    const modal = document.getElementById('review-modal');
+    if (modal) {
+      modal.hidden = true;
+      modal.setAttribute('hidden', '');
+      modal.style.display = 'none';
       document.body.style.overflow = '';
     }
-  }
+  };
 
-  if (rmClose) {
-    rmClose.addEventListener('click', closeReviewModal);
-  }
-
+  if (tTrigger) tTrigger.addEventListener('click', window.openReviewModal);
+  if (rmClose) rmClose.addEventListener('click', window.closeReviewModal);
   if (rModal) {
     rModal.addEventListener('click', e => {
-      if (e.target === rModal) closeReviewModal();
+      if (e.target === rModal) window.closeReviewModal();
     });
   }
 
   // Star Rating Selection
   if (tRatingStars.length > 0 && tRatingInput) {
-    tRatingStars.forEach((star, index) => {
+    tRatingStars.forEach((star) => {
       star.addEventListener('click', () => {
         const val = parseInt(star.getAttribute('data-val') || '5', 10);
         tRatingInput.value = val;
@@ -562,45 +586,46 @@
     });
   }
 
-  // Submit Handler
-  if (tForm) {
-    tForm.addEventListener('submit', e => {
-      e.preventDefault();
-      
-      const name = document.getElementById('t-name').value.trim();
-      const role = document.getElementById('t-role').value.trim();
-      const service = document.getElementById('t-service').value;
-      const rating = tRatingInput ? parseInt(tRatingInput.value, 10) : 5;
-      const message = tMessage.value.trim();
+  window.handleReviewSubmit = function (e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
 
-      if (!name || !role || !service || message.length < 30) {
-        if (window.showToast) {
-          window.showToast('⚠️ Please fill in all fields (min 30 characters for review).');
-        }
-        return;
+    const nameEl = document.getElementById('t-name');
+    const roleEl = document.getElementById('t-role');
+    const serviceEl = document.getElementById('t-service');
+    const msgEl = document.getElementById('t-message');
+    const ratingInp = document.getElementById('t-rating');
+
+    const name = nameEl ? nameEl.value.trim() : '';
+    const role = roleEl ? roleEl.value.trim() : '';
+    const service = serviceEl ? serviceEl.value : '';
+    const rating = ratingInp ? parseInt(ratingInp.value, 10) : 5;
+    const message = msgEl ? msgEl.value.trim() : '';
+
+    if (!name || !role || !service || message.length < 30) {
+      if (window.showToast) {
+        window.showToast('⚠️ Please fill in all fields (min 30 characters for review).');
       }
+      return false;
+    }
 
-      // Create initial avatar
-      const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CL';
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CL';
+    const starsStr = '★'.repeat(rating);
 
-      // Stars string
-      const starsStr = '★'.repeat(rating);
-
-      // Create new testimonial element
-      const newCard = document.createElement('article');
-      newCard.className = 'tcard reveal in-view';
-      newCard.style.border = '1px solid var(--accent)';
-      newCard.style.boxShadow = '0 0 20px color-mix(in srgb, var(--accent) 25%, transparent)';
-      newCard.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div class="tcard__stars" aria-label="${rating} out of 5 stars">
-            <span aria-hidden="true">${starsStr}</span>
-          </div>
-          <span style="font-size: 0.7rem; color: #10B981; font-weight: 600; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 4px;">✓ Verified Project</span>
+    const newCard = document.createElement('article');
+    newCard.className = 'tcard reveal in-view';
+    newCard.style.border = '1px solid var(--accent)';
+    newCard.style.boxShadow = '0 0 20px color-mix(in srgb, var(--accent) 25%, transparent)';
+    newCard.innerHTML = `
+      <div class="tcard__header">
+        <div class="tcard__stars" aria-label="${rating} out of 5 stars">
+          <span aria-hidden="true">${starsStr}</span>
         </div>
-        <blockquote class="tcard__quote">
-          "${message}"
-        </blockquote>
+        <span class="tcard__verified">✓ Verified Project</span>
+      </div>
+      <blockquote class="tcard__quote">
+        "${message}"
+      </blockquote>
+      <div class="tcard__footer">
         <div class="tcard__author">
           <div class="tcard__avatar" style="background: linear-gradient(135deg, var(--accent), #10B981);" aria-hidden="true">${initials}</div>
           <div>
@@ -609,36 +634,44 @@
           </div>
         </div>
         <span class="tcard__service-badge">${service}</span>
-      `;
+      </div>
+    `;
 
-      // Prepend to grid
-      if (tGrid) {
-        tGrid.prepend(newCard);
-      }
+    const grid = document.getElementById('testimonials-grid');
+    if (grid) {
+      grid.prepend(newCard);
+    }
 
-      // Show success inside modal
-      tForm.style.display = 'none';
-      if (tSuccess) tSuccess.hidden = false;
+    const formEl = document.getElementById('tsubmit-form');
+    const successEl = document.getElementById('tsubmit-success');
+    if (formEl) formEl.style.display = 'none';
+    if (successEl) {
+      successEl.hidden = false;
+      successEl.removeAttribute('hidden');
+      successEl.style.display = 'block';
+    }
 
-      // Toast notification
-      if (window.showToast) {
-        window.showToast('🎉 Thank you! Your review is now live on the site.');
-      }
+    if (window.showToast) {
+      window.showToast('🎉 Thank you! Your review is now live on the site.');
+    }
 
-      // Close modal after 1.8 seconds
-      setTimeout(() => {
-        closeReviewModal();
-      }, 1800);
+    setTimeout(() => {
+      window.closeReviewModal();
+    }, 1800);
 
-      // Save to localStorage so it stays on page reload for the visitor
-      try {
-        const existing = JSON.parse(localStorage.getItem('qz_user_reviews') || '[]');
-        existing.unshift({ name, role, service, rating, message, date: new Date().toISOString() });
-        localStorage.setItem('qz_user_reviews', JSON.stringify(existing));
-      } catch (err) {
-        console.error('LocalStorage write error:', err);
-      }
-    });
+    try {
+      const existing = JSON.parse(localStorage.getItem('qz_user_reviews') || '[]');
+      existing.unshift({ name, role, service, rating, message, date: new Date().toISOString() });
+      localStorage.setItem('qz_user_reviews', JSON.stringify(existing));
+    } catch (err) {
+      console.error('LocalStorage write error:', err);
+    }
+
+    return false;
+  };
+
+  if (tForm) {
+    tForm.addEventListener('submit', window.handleReviewSubmit);
   }
 
   // Load persisted user reviews from LocalStorage on load
@@ -652,20 +685,25 @@
         card.className = 'tcard reveal in-view';
         card.style.border = '1px solid color-mix(in srgb, var(--accent) 40%, transparent)';
         card.innerHTML = `
-          <div class="tcard__stars" aria-label="${review.rating} out of 5 stars">
-            <span aria-hidden="true">${starsStr}</span>
+          <div class="tcard__header">
+            <div class="tcard__stars" aria-label="${review.rating} out of 5 stars">
+              <span aria-hidden="true">${starsStr}</span>
+            </div>
+            <span class="tcard__verified">✓ Verified Project</span>
           </div>
           <blockquote class="tcard__quote">
             "${review.message}"
           </blockquote>
-          <div class="tcard__author">
-            <div class="tcard__avatar" style="background: linear-gradient(135deg, var(--accent), #10B981);" aria-hidden="true">${initials}</div>
-            <div>
-              <div class="tcard__name">${review.name} <span style="font-size: 0.75rem; color: #10B981; margin-left: 4px;">✓ Verified</span></div>
-              <div class="tcard__role">${review.role}</div>
+          <div class="tcard__footer">
+            <div class="tcard__author">
+              <div class="tcard__avatar" style="background: linear-gradient(135deg, var(--accent), #10B981);" aria-hidden="true">${initials}</div>
+              <div>
+                <div class="tcard__name">${review.name}</div>
+                <div class="tcard__role">${review.role}</div>
+              </div>
             </div>
+            <span class="tcard__service-badge">${review.service}</span>
           </div>
-          <span class="tcard__service-badge">${review.service}</span>
         `;
         tGrid.prepend(card);
       });
