@@ -491,8 +491,10 @@
     });
   });
 
-  // 7. Testimonials Interactive Submit Form & Persistence
+  // 7. Testimonials Interactive Review Modal & Persistence
   const tTrigger = document.getElementById('tsubmit-trigger');
+  const rModal = document.getElementById('review-modal');
+  const rmClose = document.getElementById('rm-close');
   const tForm = document.getElementById('tsubmit-form');
   const tSuccess = document.getElementById('tsubmit-success');
   const tRatingStars = document.querySelectorAll('#t-rating-stars .star-btn');
@@ -501,22 +503,32 @@
   const tCharCount = document.getElementById('t-char-count');
   const tGrid = document.getElementById('testimonials-grid');
 
-  // Toggle Form
-  if (tTrigger && tForm) {
+  // Open Modal
+  if (tTrigger && rModal) {
     tTrigger.addEventListener('click', () => {
-      const isOpen = tForm.classList.contains('open');
-      if (isOpen) {
-        tForm.classList.remove('open');
-        tForm.setAttribute('aria-hidden', 'true');
-        tTrigger.setAttribute('aria-expanded', 'false');
-      } else {
-        tForm.classList.add('open');
-        tForm.setAttribute('aria-hidden', 'false');
-        tTrigger.setAttribute('aria-expanded', 'true');
-        setTimeout(() => {
-          document.getElementById('t-name')?.focus();
-        }, 300);
-      }
+      rModal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        document.getElementById('t-name')?.focus();
+      }, 100);
+    });
+  }
+
+  // Close Modal
+  function closeReviewModal() {
+    if (rModal) {
+      rModal.hidden = true;
+      document.body.style.overflow = '';
+    }
+  }
+
+  if (rmClose) {
+    rmClose.addEventListener('click', closeReviewModal);
+  }
+
+  if (rModal) {
+    rModal.addEventListener('click', e => {
+      if (e.target === rModal) closeReviewModal();
     });
   }
 
@@ -563,7 +575,7 @@
 
       if (!name || !role || !service || message.length < 30) {
         if (window.showToast) {
-          window.showToast('⚠️ Please complete all fields (min 30 characters for review).');
+          window.showToast('⚠️ Please fill in all fields (min 30 characters for review).');
         }
         return;
       }
@@ -580,8 +592,11 @@
       newCard.style.border = '1px solid var(--accent)';
       newCard.style.boxShadow = '0 0 20px color-mix(in srgb, var(--accent) 25%, transparent)';
       newCard.innerHTML = `
-        <div class="tcard__stars" aria-label="${rating} out of 5 stars">
-          <span aria-hidden="true">${starsStr}</span>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="tcard__stars" aria-label="${rating} out of 5 stars">
+            <span aria-hidden="true">${starsStr}</span>
+          </div>
+          <span style="font-size: 0.7rem; color: #10B981; font-weight: 600; background: rgba(16,185,129,0.1); padding: 2px 8px; border-radius: 4px;">✓ Verified Project</span>
         </div>
         <blockquote class="tcard__quote">
           "${message}"
@@ -589,28 +604,31 @@
         <div class="tcard__author">
           <div class="tcard__avatar" style="background: linear-gradient(135deg, var(--accent), #10B981);" aria-hidden="true">${initials}</div>
           <div>
-            <div class="tcard__name">${name} <span style="font-size: 0.75rem; color: #10B981; margin-left: 4px;">✓ Verified</span></div>
+            <div class="tcard__name">${name}</div>
             <div class="tcard__role">${role}</div>
           </div>
         </div>
         <span class="tcard__service-badge">${service}</span>
       `;
 
-      // Append to grid
+      // Prepend to grid
       if (tGrid) {
         tGrid.prepend(newCard);
       }
 
-      // Hide form & show success
-      tForm.classList.remove('open');
-      tForm.setAttribute('aria-hidden', 'true');
-      if (tTrigger) tTrigger.style.display = 'none';
+      // Show success inside modal
+      tForm.style.display = 'none';
       if (tSuccess) tSuccess.hidden = false;
 
       // Toast notification
       if (window.showToast) {
         window.showToast('🎉 Thank you! Your review is now live on the site.');
       }
+
+      // Close modal after 1.8 seconds
+      setTimeout(() => {
+        closeReviewModal();
+      }, 1800);
 
       // Save to localStorage so it stays on page reload for the visitor
       try {
