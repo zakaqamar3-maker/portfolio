@@ -44,11 +44,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- ── Styles ─────────────────────────────────────────── -->
-  <link rel="stylesheet" href="css/tokens.css?v=20260920-v2" />
-  <link rel="stylesheet" href="css/reset.css?v=20260920-v2" />
-  <link rel="stylesheet" href="css/global.css?v=20260920-v2" />
-  <link rel="stylesheet" href="css/components.css?v=20260920-v2" />
-  <link rel="stylesheet" href="css/sections.css?v=20260920-v2" />
+  <link rel="stylesheet" href="css/tokens.css?v=20260920-v4" />
+  <link rel="stylesheet" href="css/reset.css?v=20260920-v4" />
+  <link rel="stylesheet" href="css/global.css?v=20260920-v4" />
+  <link rel="stylesheet" href="css/components.css?v=20260920-v4" />
+  <link rel="stylesheet" href="css/sections.css?v=20260920-v4" />
 
   <!-- ── Structured Data (Schema.org JSON-LD) ─────────────── -->
   <script type="application/ld+json">
@@ -1648,10 +1648,7 @@
         <!-- ── Add Your Testimonial CTA ─────────────────────── -->
         <div class="testimonials__submit reveal" style="margin-top: var(--s-10); text-align: center;">
           <p style="color: var(--text-muted); font-size: var(--fs-xs); margin-bottom: var(--s-3);">Worked with Qamar or his team?</p>
-          <button class="btn btn--accent btn--lg" id="tsubmit-trigger" aria-haspopup="dialog" aria-controls="review-modal" onclick="openReviewModal(event)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            Leave a Review ↗
-          </button>
+          <button id="writeReviewBtn" class="write-review-trigger">Write a Review</button>
         </div>
 
       </div>
@@ -2052,76 +2049,53 @@
     </div>
   </div>
 
-  <!-- ── Review Modal Overlay ───────────────────────────────── -->
-  <div class="modal-overlay" id="review-modal" role="dialog" aria-modal="true" aria-labelledby="rm-title" hidden>
-    <div class="modal-card" style="max-width: 580px; width: 92%; border-radius: 24px; padding: 32px; background: var(--surface); border: 1px solid var(--border);">
-      <button class="modal-close" id="rm-close" aria-label="Close modal" onclick="closeReviewModal(event)">✕</button>
-      <div style="margin-bottom: var(--s-5);">
-        <span class="section-label" style="font-size: 0.75rem;">Client Feedback</span>
-        <h3 id="rm-title" style="font-size: var(--fs-h3); font-weight: 700; color: var(--text); margin-top: 4px;">Share Your Experience</h3>
-        <p style="font-size: var(--fs-xs); color: var(--text-muted); margin-top: 4px;">Your review helps other clients discover quality UI/UX design &amp; creative services.</p>
-      </div>
-
-      <form class="tsubmit-form open" id="tsubmit-form" style="border: none; padding: 0; background: transparent;" novalidate onsubmit="handleReviewSubmit(event); return false;">
-        <div class="tsubmit-form__grid" style="grid-template-columns: 1fr 1fr; gap: var(--s-4);">
-          <div class="tsubmit-form__field">
-            <label for="t-name">Your Name <span aria-hidden="true">*</span></label>
-            <input type="text" id="t-name" name="name" placeholder="e.g. Ahmed Khan" required autocomplete="name" />
-          </div>
-          <div class="tsubmit-form__field">
-            <label for="t-role">Your Role &amp; Location <span aria-hidden="true">*</span></label>
-            <input type="text" id="t-role" name="role" placeholder="e.g. CEO, Startup — Pakistan 🇵🇰" required />
-          </div>
-          <div class="tsubmit-form__field">
-            <label for="t-service">Service Received <span aria-hidden="true">*</span></label>
-            <select id="t-service" name="service" required>
-              <option value="" disabled selected>Select a service…</option>
-              <option>UI/UX Design</option>
-              <option>Web Design</option>
-              <option>Video Editing &amp; Motion</option>
-              <option>Content &amp; Social Media</option>
-              <option>Digital Marketing &amp; SEO</option>
-              <option>Brand Strategy</option>
-            </select>
-          </div>
-          <div class="tsubmit-form__field">
-            <label for="t-rating">Rating <span aria-hidden="true">*</span></label>
-            <div class="tsubmit-form__stars" id="t-rating-stars" role="group" aria-label="Star rating">
-              <button type="button" class="star-btn" data-val="1" aria-label="1 star">★</button>
-              <button type="button" class="star-btn" data-val="2" aria-label="2 stars">★</button>
-              <button type="button" class="star-btn" data-val="3" aria-label="3 stars">★</button>
-              <button type="button" class="star-btn" data-val="4" aria-label="4 stars">★</button>
-              <button type="button" class="star-btn active" data-val="5" aria-label="5 stars">★</button>
-            </div>
-            <input type="hidden" id="t-rating" name="rating" value="5" />
-          </div>
-          <div class="tsubmit-form__field tsubmit-form__field--full" style="grid-column: 1 / -1;">
-            <label for="t-message">Your Review <span aria-hidden="true">*</span></label>
-            <textarea id="t-message" name="message" rows="3" placeholder="Tell others what it was like working with Qamar or his team…" required minlength="30"></textarea>
-            <span class="tsubmit-form__char-count" id="t-char-count">0 / 30 min characters</span>
-          </div>
+  <!-- The Review Form Modal -->
+  <div id="reviewModal" class="review-modal-overlay">
+    <div class="review-modal-box">
+      <span class="review-modal-close" id="closeReviewModal">&times;</span>
+      
+      <h2>Submit Your Review</h2>
+      <p>We value your feedback! Please fill out the form below.</p>
+      
+      <!-- Connected to the client's Formspree -->
+      <form id="submissionReviewForm" action="https://formspree.io/f/mjykyvlo" method="POST">
+        <div class="form-group">
+          <label for="reviewerName">Your Name</label>
+          <input type="text" id="reviewerName" name="name" placeholder="John Doe" required>
         </div>
-        <div class="tsubmit-form__footer" style="margin-top: var(--s-4); padding-top: var(--s-4);">
-          <button type="submit" class="btn btn--accent btn--full" id="tsubmit-submit">
-            Submit Review ↗
-          </button>
+        
+        <div class="form-group">
+          <label for="reviewerEmail">Your Email</label>
+          <input type="email" id="reviewerEmail" name="email" placeholder="john@example.com" required>
         </div>
+        
+        <div class="form-group">
+          <label for="reviewerRating">Rating</label>
+          <select id="reviewerRating" name="rating" required>
+            <option value="" disabled selected>Choose a rating</option>
+            <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
+            <option value="4">⭐⭐⭐⭐ (4/5)</option>
+            <option value="3">⭐⭐⭐ (3/5)</option>
+            <option value="2">⭐⭐ (2/5)</option>
+            <option value="1">⭐ (1/5)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="reviewerMessage">Your Review</label>
+          <textarea id="reviewerMessage" name="message" rows="4" placeholder="Share your experience with our services..." required></textarea>
+        </div>
+        
+        <button type="submit" id="submitReviewBtn" class="review-submit-btn">Submit Review</button>
+        <div id="reviewFormStatus" class="status-message"></div>
       </form>
-
-      <!-- Success state -->
-      <div class="tsubmit-success" id="tsubmit-success" hidden style="padding: var(--s-6); border: none;">
-        <div class="tsubmit-success__icon">✓</div>
-        <h3>Thank you for your review!</h3>
-        <p>Your feedback is now live on the site.</p>
-      </div>
-
     </div>
   </div>
 
   <!-- ── Scripts ───────────────────────────────────────────── -->
-  <script src="js/animations.js?v=20260920-v3" defer></script>
-  <script src="js/filters.js?v=20260920-v3"    defer></script>
-  <script src="js/main.js?v=20260920-v3"       defer></script>
+  <script src="js/animations.js?v=20260920-v4" defer></script>
+  <script src="js/filters.js?v=20260920-v4"    defer></script>
+  <script src="js/main.js?v=20260920-v4"       defer></script>
 
 </body>
 </html>

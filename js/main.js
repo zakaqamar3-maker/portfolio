@@ -530,205 +530,195 @@
     });
   });
 
-  // 7. Testimonials Interactive Review Modal & Persistence
-  const tTrigger = document.getElementById('tsubmit-trigger');
-  const rModal = document.getElementById('review-modal');
-  const rmClose = document.getElementById('rm-close');
-  const tForm = document.getElementById('tsubmit-form');
-  const tSuccess = document.getElementById('tsubmit-success');
-  const tRatingStars = document.querySelectorAll('#t-rating-stars .star-btn');
-  const tRatingInput = document.getElementById('t-rating');
-  const tMessage = document.getElementById('t-message');
-  const tCharCount = document.getElementById('t-char-count');
-  const tGrid = document.getElementById('testimonials-grid');
+  // 7. Testimonials Interactive Review Modal & Persistence (Formspree)
+  const reviewModal = document.getElementById('reviewModal');
+  const writeReviewBtn = document.getElementById('writeReviewBtn');
+  const closeReviewModalBtn = document.getElementById('closeReviewModal');
+  const reviewForm = document.getElementById('submissionReviewForm');
+  const reviewStatus = document.getElementById('reviewFormStatus');
 
-  window.openReviewModal = function (e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-    const modal = document.getElementById('review-modal');
-    if (modal) {
-      modal.hidden = false;
-      modal.removeAttribute('hidden');
-      modal.style.display = 'flex';
+  if (writeReviewBtn && reviewModal) {
+    writeReviewBtn.addEventListener('click', (e) => {
+      if (e) e.preventDefault();
+      reviewModal.style.display = 'flex';
+      if (reviewStatus) reviewStatus.innerHTML = '';
+      if (reviewForm) reviewForm.reset();
       document.body.style.overflow = 'hidden';
       setTimeout(() => {
-        document.getElementById('t-name')?.focus();
+        document.getElementById('reviewerName')?.focus();
       }, 50);
-    }
-  };
-
-  window.closeReviewModal = function (e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-    const modal = document.getElementById('review-modal');
-    if (modal) {
-      modal.hidden = true;
-      modal.setAttribute('hidden', '');
-      modal.style.display = 'none';
-      document.body.style.overflow = '';
-    }
-  };
-
-  if (tTrigger) tTrigger.addEventListener('click', window.openReviewModal);
-  if (rmClose) rmClose.addEventListener('click', window.closeReviewModal);
-  if (rModal) {
-    rModal.addEventListener('click', e => {
-      if (e.target === rModal) window.closeReviewModal();
     });
   }
 
-  // Star Rating Selection
-  if (tRatingStars.length > 0 && tRatingInput) {
-    tRatingStars.forEach((star) => {
-      star.addEventListener('click', () => {
-        const val = parseInt(star.getAttribute('data-val') || '5', 10);
-        tRatingInput.value = val;
-        tRatingStars.forEach((s, idx) => {
-          if (idx < val) {
-            s.classList.add('active');
-          } else {
-            s.classList.remove('active');
+  if (closeReviewModalBtn && reviewModal) {
+    closeReviewModalBtn.addEventListener('click', () => {
+      reviewModal.style.display = 'none';
+      document.body.style.overflow = '';
+    });
+  }
+
+  if (reviewModal) {
+    window.addEventListener('click', (e) => {
+      if (e.target === reviewModal) {
+        reviewModal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && reviewModal.style.display === 'flex') {
+        reviewModal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
+  if (reviewForm) {
+    reviewForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitReviewBtn');
+      if (submitBtn) submitBtn.disabled = true;
+
+      const data = new FormData(reviewForm);
+      const name = (document.getElementById('reviewerName')?.value || 'Client').trim();
+      const email = (document.getElementById('reviewerEmail')?.value || '').trim();
+      const rating = parseInt(document.getElementById('reviewerRating')?.value || '5', 10);
+      const message = (document.getElementById('reviewerMessage')?.value || '').trim();
+
+      if (reviewStatus) {
+        reviewStatus.style.color = '#2563eb';
+        reviewStatus.innerHTML = 'Submitting your review…';
+      }
+
+      fetch(reviewForm.action, {
+        method: reviewForm.method || 'POST',
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      })
+      .then(response => {
+        if (response.ok) {
+          if (reviewStatus) {
+            reviewStatus.style.color = '#10b981';
+            reviewStatus.innerHTML = 'Thank you! Your review has been submitted successfully.';
           }
-        });
+
+          // Dynamically prepend new review card to on-page testimonials grid
+          const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CL';
+          const starsStr = '★'.repeat(rating);
+          const newCard = document.createElement('article');
+          newCard.className = 'tcard reveal in-view';
+          newCard.style.border = '1px solid var(--accent, #2563eb)';
+          newCard.style.boxShadow = '0 8px 24px rgba(37, 99, 235, 0.2)';
+          newCard.innerHTML = `
+            <div class="tcard__header">
+              <div class="tcard__stars" aria-label="${rating} out of 5 stars">
+                <span aria-hidden="true">${starsStr}</span>
+              </div>
+              <span class="tcard__verified">✓ Verified Project</span>
+            </div>
+            <blockquote class="tcard__quote">
+              "${message}"
+            </blockquote>
+            <div class="tcard__footer">
+              <div class="tcard__author">
+                <div class="tcard__avatar" style="background: linear-gradient(135deg, #2563eb, #10B981);" aria-hidden="true">${initials}</div>
+                <div>
+                  <div class="tcard__name">${name}</div>
+                  <div class="tcard__role">Verified Client</div>
+                </div>
+              </div>
+              <span class="tcard__service-badge">Client Review</span>
+            </div>
+          `;
+
+          const grid = document.querySelector('.testimonials__grid') || document.getElementById('testimonials-grid');
+          if (grid) {
+            grid.prepend(newCard);
+          }
+
+          try {
+            const existing = JSON.parse(localStorage.getItem('qz_user_reviews') || '[]');
+            existing.unshift({ name, email, rating, message, date: new Date().toISOString() });
+            localStorage.setItem('qz_user_reviews', JSON.stringify(existing));
+          } catch (err) {
+            console.warn('LocalStorage review error:', err);
+          }
+
+          reviewForm.reset();
+          setTimeout(() => {
+            if (reviewModal) reviewModal.style.display = 'none';
+            document.body.style.overflow = '';
+            if (submitBtn) submitBtn.disabled = false;
+          }, 2500);
+        } else {
+          if (submitBtn) submitBtn.disabled = false;
+          response.json().then(resData => {
+            if (resData && Object.hasOwn(resData, 'errors')) {
+              if (reviewStatus) {
+                reviewStatus.style.color = '#ef4444';
+                reviewStatus.innerHTML = resData['errors'].map(error => error['message']).join(', ');
+              }
+            } else {
+              if (reviewStatus) {
+                reviewStatus.style.color = '#ef4444';
+                reviewStatus.innerHTML = 'Oops! There was a problem submitting your review.';
+              }
+            }
+          }).catch(() => {
+            if (reviewStatus) {
+              reviewStatus.style.color = '#ef4444';
+              reviewStatus.innerHTML = 'Oops! There was a problem submitting your review.';
+            }
+          });
+        }
+      })
+      .catch(error => {
+        if (submitBtn) submitBtn.disabled = false;
+        if (reviewStatus) {
+          reviewStatus.style.color = '#ef4444';
+          reviewStatus.innerHTML = 'Oops! There was a problem connecting to the server.';
+        }
       });
     });
-  }
-
-  // Character Counter for Review
-  if (tMessage && tCharCount) {
-    tMessage.addEventListener('input', () => {
-      const len = tMessage.value.trim().length;
-      tCharCount.textContent = `${len} / 30 min characters`;
-      if (len >= 30) {
-        tCharCount.classList.add('ready');
-      } else {
-        tCharCount.classList.remove('ready');
-      }
-    });
-  }
-
-  window.handleReviewSubmit = function (e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-
-    const nameEl = document.getElementById('t-name');
-    const roleEl = document.getElementById('t-role');
-    const serviceEl = document.getElementById('t-service');
-    const msgEl = document.getElementById('t-message');
-    const ratingInp = document.getElementById('t-rating');
-
-    const name = nameEl ? nameEl.value.trim() : '';
-    const role = roleEl ? roleEl.value.trim() : '';
-    const service = serviceEl ? serviceEl.value : '';
-    const rating = ratingInp ? parseInt(ratingInp.value, 10) : 5;
-    const message = msgEl ? msgEl.value.trim() : '';
-
-    if (!name || !role || !service || message.length < 30) {
-      if (window.showToast) {
-        window.showToast('⚠️ Please fill in all fields (min 30 characters for review).');
-      }
-      return false;
-    }
-
-    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CL';
-    const starsStr = '★'.repeat(rating);
-
-    const newCard = document.createElement('article');
-    newCard.className = 'tcard reveal in-view';
-    newCard.style.border = '1px solid var(--accent)';
-    newCard.style.boxShadow = '0 0 20px color-mix(in srgb, var(--accent) 25%, transparent)';
-    newCard.innerHTML = `
-      <div class="tcard__header">
-        <div class="tcard__stars" aria-label="${rating} out of 5 stars">
-          <span aria-hidden="true">${starsStr}</span>
-        </div>
-        <span class="tcard__verified">✓ Verified Project</span>
-      </div>
-      <blockquote class="tcard__quote">
-        "${message}"
-      </blockquote>
-      <div class="tcard__footer">
-        <div class="tcard__author">
-          <div class="tcard__avatar" style="background: linear-gradient(135deg, var(--accent), #10B981);" aria-hidden="true">${initials}</div>
-          <div>
-            <div class="tcard__name">${name}</div>
-            <div class="tcard__role">${role}</div>
-          </div>
-        </div>
-        <span class="tcard__service-badge">${service}</span>
-      </div>
-    `;
-
-    const grid = document.getElementById('testimonials-grid');
-    if (grid) {
-      grid.prepend(newCard);
-    }
-
-    const formEl = document.getElementById('tsubmit-form');
-    const successEl = document.getElementById('tsubmit-success');
-    if (formEl) formEl.style.display = 'none';
-    if (successEl) {
-      successEl.hidden = false;
-      successEl.removeAttribute('hidden');
-      successEl.style.display = 'block';
-    }
-
-    if (window.showToast) {
-      window.showToast('🎉 Thank you! Your review is now live on the site.');
-    }
-
-    setTimeout(() => {
-      window.closeReviewModal();
-    }, 1800);
-
-    try {
-      const existing = JSON.parse(localStorage.getItem('qz_user_reviews') || '[]');
-      existing.unshift({ name, role, service, rating, message, date: new Date().toISOString() });
-      localStorage.setItem('qz_user_reviews', JSON.stringify(existing));
-    } catch (err) {
-      console.error('LocalStorage write error:', err);
-    }
-
-    return false;
-  };
-
-  if (tForm) {
-    tForm.addEventListener('submit', window.handleReviewSubmit);
   }
 
   // Load persisted user reviews from LocalStorage on load
   try {
     const saved = JSON.parse(localStorage.getItem('qz_user_reviews') || '[]');
-    if (saved.length > 0 && tGrid) {
+    const grid = document.querySelector('.testimonials__grid') || document.getElementById('testimonials-grid');
+    if (saved.length > 0 && grid) {
       saved.forEach(review => {
-        const initials = review.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CL';
+        const initials = review.name ? review.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'CL';
         const starsStr = '★'.repeat(review.rating || 5);
         const card = document.createElement('article');
         card.className = 'tcard reveal in-view';
-        card.style.border = '1px solid color-mix(in srgb, var(--accent) 40%, transparent)';
+        card.style.border = '1px solid var(--accent, #2563eb)';
         card.innerHTML = `
           <div class="tcard__header">
-            <div class="tcard__stars" aria-label="${review.rating} out of 5 stars">
+            <div class="tcard__stars" aria-label="${review.rating || 5} out of 5 stars">
               <span aria-hidden="true">${starsStr}</span>
             </div>
             <span class="tcard__verified">✓ Verified Project</span>
           </div>
           <blockquote class="tcard__quote">
-            "${review.message}"
+            "${review.message || ''}"
           </blockquote>
           <div class="tcard__footer">
             <div class="tcard__author">
-              <div class="tcard__avatar" style="background: linear-gradient(135deg, var(--accent), #10B981);" aria-hidden="true">${initials}</div>
+              <div class="tcard__avatar" style="background: linear-gradient(135deg, #2563eb, #10B981);" aria-hidden="true">${initials}</div>
               <div>
-                <div class="tcard__name">${review.name}</div>
-                <div class="tcard__role">${review.role}</div>
+                <div class="tcard__name">${review.name || 'Client'}</div>
+                <div class="tcard__role">Verified Client</div>
               </div>
             </div>
-            <span class="tcard__service-badge">${review.service}</span>
+            <span class="tcard__service-badge">Client Review</span>
           </div>
         `;
-        tGrid.prepend(card);
+        grid.prepend(card);
       });
     }
   } catch (err) {
-    console.error('LocalStorage read error:', err);
+    console.warn('LocalStorage review load error:', err);
   }
 
 })();
