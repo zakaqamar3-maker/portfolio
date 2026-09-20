@@ -1817,25 +1817,21 @@
 
             <!-- Success message (hidden until form submitted) -->
             <div class="form-success" id="form-success" tabindex="-1" aria-live="polite">
-              <div class="form-success__icon" aria-hidden="true">✉️</div>
-              <h3 class="form-success__title">Opening Your Email App…</h3>
+              <div class="form-success__icon" aria-hidden="true">✓</div>
+              <h3 class="form-success__title">Thank you!</h3>
               <p class="form-success__body">
-                Your email app (Gmail / Outlook / Mail) is opening automatically with all your project details pre-filled.
+                Your message has been sent successfully. I'll get back to you shortly.
               </p>
-              <div style="margin-top: 16px;">
-                <a id="manual-mailto-link" href="#" class="btn btn--accent btn--sm">
-                  Click here if email app didn't open ↗
-                </a>
-              </div>
             </div>
 
             <!-- Form -->
             <form
               class="contact__form"
               id="contact-form"
+              action="https://formspree.io/f/mjykyvlo"
+              method="POST"
               novalidate
               aria-label="Contact form"
-              onsubmit="handleContactSubmit(event); return false;"
             >
               <div class="contact__form-row">
 
@@ -1876,17 +1872,18 @@
               </div>
 
               <div class="form-field">
-                <label class="form-label" for="f-type">Project type</label>
-                <select class="form-select" id="f-type" name="project_type">
-                  <option value="">Select a project type…</option>
-                  <option value="ui-ux">UI/UX Design</option>
-                  <option value="web">Web Design</option>
-                  <option value="video">Video Editing &amp; Motion</option>
-                  <option value="leadership">Creative Leadership / Team Lead</option>
-                  <option value="content">Content Creation</option>
-                  <option value="social">Social Media Management</option>
-                  <option value="marketing">Digital Marketing</option>
-                  <option value="other">Something else</option>
+                <label class="form-label" for="f-service">Service Selection</label>
+                <select class="form-select" id="f-service" name="service">
+                  <option value="">Select a service…</option>
+                  <option value="UI/UX Design">UI/UX Design</option>
+                  <option value="Web Design">Web Design</option>
+                  <option value="Video Editing & Motion">Video Editing &amp; Motion</option>
+                  <option value="Creative Leadership">Creative Leadership / Team Lead</option>
+                  <option value="Content Creation">Content Creation</option>
+                  <option value="Social Media Management">Social Media Management</option>
+                  <option value="Digital Marketing & SEO">Digital Marketing &amp; SEO</option>
+                  <option value="Brand Strategy">Brand Strategy</option>
+                  <option value="Other">Other / Custom Request</option>
                 </select>
               </div>
 
@@ -1906,8 +1903,10 @@
                 <span class="form-error" id="f-message-err" role="alert" hidden></span>
               </div>
 
+              <div id="form-error-msg" class="form-error" style="margin-bottom: var(--s-3);" hidden role="alert"></div>
+
               <div class="contact__submit-wrap">
-                <button class="btn btn--accent btn--lg" type="submit">
+                <button class="btn btn--accent btn--lg" type="submit" id="contact-submit-btn">
                   <span class="btn-text">Send Message ↗</span>
                 </button>
                 <p class="contact__privacy">
@@ -2120,9 +2119,9 @@
   </div>
 
   <!-- ── Scripts ───────────────────────────────────────────── -->
-  <script src="js/animations.js?v=20260920-v2" defer></script>
-  <script src="js/filters.js?v=20260920-v2"    defer></script>
-  <script src="js/main.js?v=20260920-v2"       defer></script>
+  <script src="js/animations.js?v=20260920-v3" defer></script>
+  <script src="js/filters.js?v=20260920-v3"    defer></script>
+  <script src="js/main.js?v=20260920-v3"       defer></script>
 
 </body>
 </html>

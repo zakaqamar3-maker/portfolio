@@ -166,11 +166,17 @@
 
     const cForm = document.getElementById('contact-form');
     const cSuccess = document.getElementById('form-success');
+    const errBanner = document.getElementById('form-error-msg');
     if (!cForm) return false;
+
+    if (errBanner) {
+      errBanner.textContent = '';
+      errBanner.setAttribute('hidden', '');
+    }
 
     const nameEl = document.getElementById('f-name');
     const emailEl = document.getElementById('f-email');
-    const typeSelect = document.getElementById('f-type');
+    const serviceSelect = document.getElementById('f-service');
     const messageEl = document.getElementById('f-message');
 
     let valid = true;
@@ -195,82 +201,73 @@
 
     if (!valid) return false;
 
-    const btn = cForm.querySelector('button[type="submit"]');
+    const btn = document.getElementById('contact-submit-btn') || cForm.querySelector('button[type="submit"]');
     const btnText = btn ? btn.querySelector('.btn-text') : null;
     if (btn) btn.disabled = true;
-    if (btnText) btnText.textContent = 'Opening Email App… ✉️';
+    if (btnText) btnText.textContent = 'Sending Message…';
 
     const name = nameEl.value.trim();
     const email = emailEl.value.trim();
-    const type = typeSelect && typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : 'General Inquiry';
+    const service = serviceSelect && serviceSelect.value ? serviceSelect.value : 'General Inquiry';
     const message = messageEl.value.trim();
 
-    // Construct Mailto prefilled link
-    const subjectStr = `New Project Inquiry from ${name}`;
-    const bodyStr = `Name: ${name}\n` +
-                    `Email: ${email}\n` +
-                    `Project Type: ${type}\n\n` +
-                    `Message:\n${message}`;
-
-    const mailtoUrl = `mailto:zakaqmar3@gmail.com?subject=${encodeURIComponent(subjectStr)}&body=${encodeURIComponent(bodyStr)}`;
-
-    // Set fallback manual link
-    const manualLink = document.getElementById('manual-mailto-link');
-    if (manualLink) {
-      manualLink.href = mailtoUrl;
-    }
-
-    // Trigger background FormSubmit AJAX send as double guarantee
     try {
-      const payload = {
-        name: name,
-        email: email,
-        project_type: type,
-        message: message,
-        _subject: `📩 New Lead from ${name}`,
-        _captcha: "false"
-      };
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('email', email);
+      formData.append('service', service);
+      formData.append('message', message);
 
-      fetch('https://formsubmit.co/ajax/zakaqmar3@gmail.com', {
+      const response = await fetch('https://formspree.io/f/mjykyvlo', {
         method: 'POST',
+        body: formData,
         headers: {
-          'Content-Type': 'application/json',
           'Accept': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      }).catch(err => console.warn('Background FormSubmit AJAX notification:', err));
-    } catch (err) {
-      console.warn('Background dispatch error:', err);
+        }
+      });
+
+      if (response.ok) {
+        // Hide form & show success view
+        cForm.style.display = 'none';
+        if (cSuccess) {
+          cSuccess.style.display = 'block';
+          cSuccess.classList.add('visible');
+          cSuccess.focus();
+        }
+
+        // Save lead to LocalStorage backup
+        try {
+          const leads = JSON.parse(localStorage.getItem('qz_user_leads') || '[]');
+          leads.unshift({ name, email, service, message, date: new Date().toISOString() });
+          localStorage.setItem('qz_user_leads', JSON.stringify(leads));
+        } catch (err) {
+          console.warn('LocalStorage lead error:', err);
+        }
+
+        cForm.reset();
+      } else {
+        const data = await response.json().catch(() => ({}));
+        let errorMsg = 'Oops! There was a problem submitting your form. Please try again.';
+        if (data && data.errors && data.errors.length > 0) {
+          errorMsg = data.errors.map(err => err.message).join(', ');
+        }
+        if (errBanner) {
+          errBanner.textContent = errorMsg;
+          errBanner.removeAttribute('hidden');
+        }
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.textContent = 'Send Message ↗';
+      }
+    } catch (error) {
+      console.error('Form submission error:', error);
+      if (errBanner) {
+        errBanner.textContent = 'Network error. Please check your connection or email directly to zakaqmar3@gmail.com';
+        errBanner.removeAttribute('hidden');
+      }
+      if (btn) btn.disabled = false;
+      if (btnText) btnText.textContent = 'Send Message ↗';
     }
 
-    // Hide form & show success view
-    cForm.style.display = 'none';
-    if (cSuccess) {
-      cSuccess.style.display = 'block';
-      cSuccess.classList.add('visible');
-      cSuccess.focus();
-    }
-
-    if (window.showToast) {
-      window.showToast('✉️ Opening email app with pre-filled details…');
-    }
-
-    // Save lead to LocalStorage
-    try {
-      const leads = JSON.parse(localStorage.getItem('qz_user_leads') || '[]');
-      leads.unshift({ name, email, type, message, date: new Date().toISOString() });
-      localStorage.setItem('qz_user_leads', JSON.stringify(leads));
-    } catch (err) {
-      console.error('LocalStorage lead error:', err);
-    }
-
-    // Auto open email client app with prefilled data
-    setTimeout(() => {
-      window.location.href = mailtoUrl;
-    }, 250);
-
-    if (btn) btn.disabled = false;
-    if (btnText) btnText.textContent = 'Send Message ↗';
     return false;
   };
 
