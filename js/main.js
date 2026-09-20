@@ -580,10 +580,10 @@
       if (submitBtn) submitBtn.disabled = true;
 
       const data = new FormData(reviewForm);
-      const name = (document.getElementById('reviewerName')?.value || 'Client').trim();
-      const email = (document.getElementById('reviewerEmail')?.value || '').trim();
-      const rating = parseInt(document.getElementById('reviewerRating')?.value || '5', 10);
-      const message = (document.getElementById('reviewerMessage')?.value || '').trim();
+      const name = (data.get('name') || 'Client').trim();
+      const email = (data.get('email') || '').trim();
+      const rating = parseInt(data.get('rating') || '5', 10);
+      const message = (data.get('message') || '').trim();
 
       if (reviewStatus) {
         reviewStatus.style.color = '#2563eb';
@@ -602,38 +602,38 @@
             reviewStatus.innerHTML = 'Thank you! Your review has been submitted successfully.';
           }
 
-          // Dynamically prepend new review card to on-page testimonials grid
-          const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CL';
-          const starsStr = '★'.repeat(rating);
-          const newCard = document.createElement('article');
-          newCard.className = 'tcard reveal in-view';
-          newCard.style.border = '1px solid var(--accent, #2563eb)';
-          newCard.style.boxShadow = '0 8px 24px rgba(37, 99, 235, 0.2)';
-          newCard.innerHTML = `
-            <div class="tcard__header">
-              <div class="tcard__stars" aria-label="${rating} out of 5 stars">
-                <span aria-hidden="true">${starsStr}</span>
-              </div>
-              <span class="tcard__verified">✓ Verified Project</span>
-            </div>
-            <blockquote class="tcard__quote">
-              "${message}"
-            </blockquote>
-            <div class="tcard__footer">
-              <div class="tcard__author">
-                <div class="tcard__avatar" style="background: linear-gradient(135deg, #2563eb, #10B981);" aria-hidden="true">${initials}</div>
-                <div>
-                  <div class="tcard__name">${name}</div>
-                  <div class="tcard__role">Verified Client</div>
+          // Dynamically create and prepend new testimonial card element to the live grid
+          const testimonialGrid = document.querySelector('.testimonials__grid') || document.getElementById('testimonials-grid');
+          if (testimonialGrid) {
+            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'CL';
+            const starsStr = '★'.repeat(rating);
+            const newCard = document.createElement('article');
+            newCard.className = 'tcard reveal in-view';
+            newCard.style.border = '1.5px solid var(--accent, #2563eb)';
+            newCard.style.boxShadow = '0 12px 30px rgba(37, 99, 235, 0.22)';
+            newCard.style.animation = 'reviewModalFadeIn 0.4s ease-out';
+            newCard.innerHTML = `
+              <div class="tcard__header">
+                <div class="tcard__stars" aria-label="${rating} out of 5 stars">
+                  <span aria-hidden="true">${starsStr}</span>
                 </div>
+                <span class="tcard__verified">✓ Verified Project</span>
               </div>
-              <span class="tcard__service-badge">Client Review</span>
-            </div>
-          `;
-
-          const grid = document.querySelector('.testimonials__grid') || document.getElementById('testimonials-grid');
-          if (grid) {
-            grid.prepend(newCard);
+              <blockquote class="tcard__quote">
+                "${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}"
+              </blockquote>
+              <div class="tcard__footer">
+                <div class="tcard__author">
+                  <div class="tcard__avatar" style="background: linear-gradient(135deg, #2563eb, #10B981);" aria-hidden="true">${initials}</div>
+                  <div>
+                    <div class="tcard__name">${name.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                    <div class="tcard__role">Verified Client</div>
+                  </div>
+                </div>
+                <span class="tcard__service-badge">Client Review</span>
+              </div>
+            `;
+            testimonialGrid.prepend(newCard); // Add to the top of the list
           }
 
           try {
