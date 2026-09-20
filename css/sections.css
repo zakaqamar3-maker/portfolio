@@ -16,13 +16,15 @@
   overflow: hidden;
 }
 
-/* Subtle dot grid texture */
+/* Subtle dot grid texture and ambient kinetic glow */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(49, 92, 255, 0.045) 1px, transparent 1px);
-  background-size: 36px 36px;
+  background-image: 
+    radial-gradient(circle at 75% 25%, rgba(49, 92, 255, 0.12) 0%, rgba(99, 102, 241, 0.05) 35%, transparent 65%),
+    radial-gradient(circle, rgba(49, 92, 255, 0.045) 1px, transparent 1px);
+  background-size: 100% 100%, 36px 36px;
   pointer-events: none;
   z-index: 0;
 }
@@ -50,19 +52,27 @@
   align-items: center;
   gap: var(--s-2);
   padding: var(--s-2) var(--s-4);
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(49, 92, 255, 0.22);
   border-radius: var(--r-full);
   font-size: var(--fs-sm);
-  color: var(--text-muted);
+  color: var(--text);
   width: fit-content;
-  box-shadow: var(--sh-xs);
-  font-weight: var(--fw-medium);
+  box-shadow: 0 4px 16px rgba(49, 92, 255, 0.08);
+  font-weight: var(--fw-semibold);
+  transition: transform var(--t-spring), border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.hero__status:hover {
+  transform: translateY(-2px) scale(1.02);
+  border-color: var(--accent);
+  box-shadow: 0 8px 24px rgba(49, 92, 255, 0.16);
 }
 
 .hero__status-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   background: #22C55E;
   border-radius: 50%;
   flex-shrink: 0;
@@ -71,7 +81,7 @@
 
 @keyframes statusPulse {
   0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
-  50%       { opacity: 0.7; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+  50%       { opacity: 0.8; box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
 }
 
 .hero__headline {
@@ -83,7 +93,10 @@
 }
 
 .hero__headline .a {
-  color: var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, #4F46E5 55%, #0284C7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
 }
 
 .hero__body {
@@ -108,6 +121,24 @@
   perspective: 1000px;
 }
 
+/* Ambient glow aura behind photo frame */
+.hero__visual::before {
+  content: '';
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(49, 92, 255, 0.22) 0%, rgba(99, 102, 241, 0.12) 50%, transparent 70%);
+  filter: blur(40px);
+  z-index: 0;
+  pointer-events: none;
+  animation: auraPulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes auraPulse {
+  0%   { transform: scale(0.9) translate(0, 0); opacity: 0.7; }
+  100% { transform: scale(1.15) translate(-10px, 10px); opacity: 1; }
+}
+
 .hero__photo-wrap {
   position: relative;
   width: 100%;
@@ -121,13 +152,13 @@
 .hero__photo-frame {
   width: 100%;
   aspect-ratio: 4/5;
-  border-radius: var(--r-xl);
+  border-radius: var(--r-2xl);
   overflow: hidden;
   position: relative;
   background: #EBEBEA;
-  border: 1px solid var(--border);
-  box-shadow: 0 20px 40px -15px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03);
-  transition: transform 0.5s var(--ease-out), box-shadow 0.5s var(--ease-out);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 24px 50px -15px rgba(49, 92, 255, 0.16), 0 0 0 1px rgba(0,0,0,0.04);
+  transition: transform 0.5s var(--ease-spring), box-shadow 0.5s var(--ease-spring);
   z-index: 2;
 }
 
@@ -137,15 +168,15 @@
   object-fit: cover;
   object-position: top center;
   display: block;
-  transition: transform 0.6s var(--ease-out), filter 0.6s var(--ease-out);
+  transition: transform 0.6s var(--ease-spring), filter 0.6s var(--ease-spring);
 }
 
 .hero__photo-wrap:hover .hero__photo-frame {
-  box-shadow: 0 30px 60px -20px rgba(49, 92, 255, 0.25), 0 0 0 1.5px rgba(49, 92, 255, 0.2);
+  box-shadow: 0 32px 70px -18px rgba(49, 92, 255, 0.35), 0 0 0 2px rgba(49, 92, 255, 0.3);
 }
 
 .hero__photo-wrap:hover .hero__photo-frame img {
-  transform: scale(1.035);
+  transform: scale(1.04);
 }
 
 /* ── Interactive Rectangle (Deco Box) ────────── */
