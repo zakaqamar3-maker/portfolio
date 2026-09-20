@@ -113,34 +113,46 @@ body {
 .u-muted { color: var(--text-muted); }
 .u-accent { color: var(--accent); }
 
-/* ── Reveal Animations ───────────────────────────────────── */
+/* ── Reveal Animations (Kinetic Spring Physics) ──────────── */
 .reveal {
   opacity: 0;
-  transform: translateY(22px);
-  transition: opacity var(--t-slow), transform var(--t-slow);
+  transform: translateY(28px) scale(0.98);
+  transition: opacity var(--t-spring), transform var(--t-spring);
+  will-change: transform, opacity;
 }
 
-.reveal--right { transform: translateX(22px); }
-.reveal--left  { transform: translateX(-22px); }
-.reveal--scale { transform: scale(0.97); }
+.reveal--right { transform: translateX(28px) scale(0.98); }
+.reveal--left  { transform: translateX(-28px) scale(0.98); }
+.reveal--scale { transform: scale(0.94); }
 
 .reveal.in-view {
   opacity: 1;
-  transform: none;
+  transform: translateY(0) translateX(0) scale(1);
 }
 
 /* Stagger delays */
-.reveal-d1 { transition-delay: 80ms;  }
-.reveal-d2 { transition-delay: 160ms; }
-.reveal-d3 { transition-delay: 240ms; }
-.reveal-d4 { transition-delay: 320ms; }
-.reveal-d5 { transition-delay: 400ms; }
+.reveal-d1 { transition-delay: 60ms;  }
+.reveal-d2 { transition-delay: 120ms; }
+.reveal-d3 { transition-delay: 180ms; }
+.reveal-d4 { transition-delay: 240ms; }
+.reveal-d5 { transition-delay: 300ms; }
+
+/* ── Kinetic Shimmer & Glow Effects ──────────────────────── */
+@keyframes kineticShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes softPulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(49, 92, 255, 0.25); }
+  50%      { box-shadow: 0 0 0 8px rgba(49, 92, 255, 0); }
+}
 
 /* Disable reveals when motion is reduced */
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     opacity: 1;
-    transform: none;
-    transition: none;
+    transform: none !important;
+    transition: none !important;
   }
 }

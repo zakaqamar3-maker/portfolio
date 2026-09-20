@@ -173,7 +173,7 @@
 
 
 /* ══════════════════════════════════════════════════════════════
-   BUTTONS
+   BUTTONS (Kinetic Spring Physics)
    ══════════════════════════════════════════════════════════════ */
 .btn {
   display: inline-flex;
@@ -190,28 +190,56 @@
     background-color var(--t-fast),
     color            var(--t-fast),
     border-color     var(--t-fast),
-    transform        var(--t-fast),
-    box-shadow       var(--t-fast);
+    transform        var(--t-spring),
+    box-shadow       var(--t-spring);
   white-space: nowrap;
   cursor: pointer;
   min-height: 44px;
   text-decoration: none;
   position: relative;
+  overflow: hidden;
   -webkit-tap-highlight-color: transparent;
+  will-change: transform, box-shadow;
 }
-.btn:active { transform: translateY(1px) !important; }
+.btn:active { transform: scale(0.96) translateY(1px) !important; }
 
 /* Accent / filled */
 .btn--accent {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
+  box-shadow: 0 4px 14px rgba(49, 92, 255, 0.25);
 }
+
+/* Kinetic Sheen Highlight on Accent Buttons */
+.btn--accent::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  transition: none;
+  pointer-events: none;
+}
+
+.btn--accent:hover::after {
+  left: 140%;
+  transition: left 0.75s var(--ease-spring);
+}
+
 .btn--accent:hover {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
-  box-shadow: 0 4px 16px rgba(49, 92, 255, 0.35);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(49, 92, 255, 0.4);
+  transform: translateY(-2px) scale(1.02);
 }
 
 /* Outline */
@@ -222,7 +250,8 @@
 }
 .btn--outline:hover {
   border-color: var(--text);
-  transform: translateY(-1px);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
 /* Ghost */
@@ -232,7 +261,10 @@
   border-color: transparent;
   padding-inline: var(--s-2);
 }
-.btn--ghost:hover { background: var(--accent-light); }
+.btn--ghost:hover {
+  background: var(--accent-light);
+  transform: translateX(3px);
+}
 
 /* Sizes */
 .btn--sm  { padding: 0.5rem 1rem; font-size: var(--fs-xs); min-height: 36px; }
@@ -282,12 +314,12 @@
 
 
 /* ══════════════════════════════════════════════════════════════
-   TAGS
+   TAGS (Interactive Pills)
    ══════════════════════════════════════════════════════════════ */
 .tag {
   display: inline-flex;
   align-items: center;
-  padding: 0.3rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-full);
@@ -295,22 +327,28 @@
   font-weight: var(--fw-medium);
   color: var(--text-muted);
   white-space: nowrap;
-  transition: border-color var(--t-fast), color var(--t-fast), background var(--t-fast);
+  transition:
+    border-color var(--t-fast),
+    color var(--t-fast),
+    background var(--t-fast),
+    transform var(--t-spring);
+  will-change: transform;
 }
 .tag:hover, .tag--active {
-  border-color: rgba(49, 92, 255, 0.3);
+  border-color: rgba(49, 92, 255, 0.4);
   color: var(--accent);
   background: var(--accent-light);
+  transform: translateY(-2px) scale(1.03);
 }
 
 
 /* ══════════════════════════════════════════════════════════════
-   FILTER TABS
+   FILTER TABS (Kinetic Active States)
    ══════════════════════════════════════════════════════════════ */
 .filter-btn {
   display: inline-flex;
   align-items: center;
-  padding: 0.5rem 1.1rem;
+  padding: 0.5rem 1.15rem;
   font-size: var(--fs-sm);
   font-weight: var(--fw-medium);
   color: var(--text-muted);
@@ -318,17 +356,33 @@
   border: 1px solid transparent;
   border-radius: var(--r-full);
   cursor: pointer;
-  transition: color var(--t-fast), background var(--t-fast), border-color var(--t-fast);
+  transition:
+    color var(--t-fast),
+    background var(--t-fast),
+    border-color var(--t-fast),
+    transform var(--t-spring),
+    box-shadow var(--t-spring);
   min-height: 44px;
   white-space: nowrap;
   flex-shrink: 0;
+  will-change: transform;
 }
-.filter-btn:hover { color: var(--text); background: var(--surface); }
-.filter-btn.active { background: var(--text); color: #fff; }
+.filter-btn:hover {
+  color: var(--text);
+  background: var(--surface);
+  transform: translateY(-1px);
+}
+.filter-btn.active {
+  background: var(--text);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+.filter-btn:active { transform: scale(0.96); }
 
 
 /* ══════════════════════════════════════════════════════════════
-   SERVICE CARD
+   SERVICE CARD (Kinetic Elevation)
    ══════════════════════════════════════════════════════════════ */
 .service-card {
   padding: var(--s-8);
@@ -340,7 +394,11 @@
   gap: var(--s-5);
   position: relative;
   overflow: hidden;
-  transition: box-shadow var(--t-base), transform var(--t-base);
+  transition:
+    box-shadow var(--t-spring),
+    transform var(--t-spring),
+    border-color var(--t-fast);
+  will-change: transform, box-shadow;
 }
 
 /* Accent bar on left */
@@ -350,15 +408,19 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 3px;
+  width: 3.5px;
   background: var(--accent);
   transform: scaleY(0);
   transform-origin: bottom center;
-  transition: transform var(--t-base);
+  transition: transform var(--t-spring);
   border-radius: 0 var(--r-sm) var(--r-sm) 0;
 }
 .service-card:hover::before { transform: scaleY(1); transform-origin: top center; }
-.service-card:hover         { box-shadow: var(--sh-md); transform: translateY(-3px); }
+.service-card:hover {
+  box-shadow: 0 16px 36px -8px rgba(49, 92, 255, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(49, 92, 255, 0.35);
+}
 
 .service-card__header {
   display: flex;
@@ -381,7 +443,7 @@
   color: var(--accent);
   transform: translate(-6px, 4px);
   opacity: 0;
-  transition: transform var(--t-base), opacity var(--t-base);
+  transition: transform var(--t-spring), opacity var(--t-fast);
   flex-shrink: 0;
 }
 .service-card:hover .service-card__arrow { transform: translate(0, 0); opacity: 1; }
@@ -426,25 +488,29 @@
 
 
 /* ══════════════════════════════════════════════════════════════
-   PROJECT CARD
+   PROJECT CARD (Jitter Kinetic Polish)
    ══════════════════════════════════════════════════════════════ */
 .project-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-xl);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: box-shadow var(--t-base), transform var(--t-base), border-color var(--t-base);
+  transition:
+    box-shadow var(--t-spring),
+    transform var(--t-spring),
+    border-color var(--t-fast);
   cursor: pointer;
   text-decoration: none;
   color: inherit;
   position: relative;
+  will-change: transform, box-shadow;
 }
 .project-card:hover {
-  box-shadow: var(--sh-lg);
-  transform: translateY(-5px);
-  border-color: var(--border-dark);
+  box-shadow: 0 20px 48px -12px rgba(49, 92, 255, 0.16), 0 4px 16px rgba(0, 0, 0, 0.05);
+  transform: translateY(-7px) scale(1.008);
+  border-color: rgba(49, 92, 255, 0.35);
 }
 
 /* Hidden state (filtered out) */
